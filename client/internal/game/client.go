@@ -1,8 +1,8 @@
 package game
 
 import (
-	"gopong/config"
-	"gopong/internal/gui"
+	"gopong/client/config"
+	"gopong/client/internal/gui"
 )
 
 type ClientUpdater struct {

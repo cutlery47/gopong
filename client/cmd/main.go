@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopong/internal/game"
+	"gopong/client/internal/game"
 	"log"
 )
 

@@ -1,7 +1,7 @@
 package game
 
 import (
-	"gopong/internal/gui"
+	"gopong/client/internal/gui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

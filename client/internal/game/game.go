@@ -3,8 +3,8 @@ package game
 import (
 	"fmt"
 
-	"gopong/config"
-	"gopong/internal/gui"
+	"gopong/client/config"
+	"gopong/client/internal/gui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

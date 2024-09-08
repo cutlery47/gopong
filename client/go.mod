@@ -1,4 +1,4 @@
-module gopong
+module gopong/client
 
 go 1.23
 
