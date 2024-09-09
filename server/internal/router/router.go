@@ -12,13 +12,18 @@ type route struct {
 }
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	for route, handler := range router.routes {
-		if req.Method == route.method && req.RequestURI == route.uri {
-			handler.ServeHTTP(w, req)
-			return
-		}
+	req_route := route{
+		method: req.Method,
+		uri:    req.RequestURI,
 	}
-	w.WriteHeader(http.StatusNotFound)
+
+	req_handler := router.routes[req_route]
+	if req_handler == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	req_handler.ServeHTTP(w, req)
 }
 
 func NewRouter(connectionHandler http.Handler) *Router {

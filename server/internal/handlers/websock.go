@@ -8,8 +8,8 @@ import (
 )
 
 type WebsocketHandler struct {
-	qHandler *QueueHandler
-	upgrader websocket.Upgrader
+	queueHandler *QueueHandler
+	upgrader     websocket.Upgrader
 }
 
 func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -19,18 +19,28 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(400)
 	}
 
-	handler.qHandler.queue = append(handler.qHandler.queue, conn)
+	handler.queueHandler.queue = append(handler.queueHandler.queue, conn)
 }
 
 func NewWebsocketHandler() *WebsocketHandler {
-	sHandler := newSessionHandler()
-	qHandler := newQueueHandler(sHandler)
+	gameHandler := new(GameHandler)
+	configHandler := new(ConfigHandler)
+
+	sessionHandler := newSessionHandler(
+		gameHandler,
+	)
+
+	queueHandler := newQueueHandler(
+		sessionHandler,
+		configHandler,
+	)
+
 	upgrader := websocket.Upgrader{}
 
-	go qHandler.Handle()
+	go queueHandler.Handle()
 
 	return &WebsocketHandler{
-		qHandler: qHandler,
-		upgrader: upgrader,
+		queueHandler: queueHandler,
+		upgrader:     upgrader,
 	}
 }

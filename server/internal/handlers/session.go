@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/gob"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 )
 
 type SessionHandler struct {
-	sessions []Session
+	gameHandler *GameHandler
 }
 
 type Session struct {
@@ -20,52 +19,65 @@ type Session struct {
 	player2 *websocket.Conn
 }
 
-func (handler *SessionHandler) Handle(sesh Session) {
-	log.Println("Started session handling")
-
-	buf1 := new(bytes.Buffer)
-	buf2 := new(bytes.Buffer)
-
-	enc1 := gob.NewEncoder(buf1)
-	enc2 := gob.NewEncoder(buf2)
+func (h *SessionHandler) Handle(sesh Session, cfg packet.ConfigRequestPacket) {
+	log.Printf("Started handling session %v", sesh)
 
 	for {
-		somedata := packet.Packet{
-			State: packet.StateMatchmaking,
-			Left: packet.VectorPackage{
-				X: 0,
-				Y: 0,
-			},
-			Right: packet.VectorPackage{
-				X: 0,
-				Y: 0,
-			},
-			Ball: packet.VectorPackage{
-				X: 0,
-				Y: 0,
-			},
+		left, right, err := h.recvIncomingData(sesh)
+		if err != nil {
+			log.Println(fmt.Errorf("SessionHandler.Handle: %v", err))
 		}
 
-		log.Println("Enc1:", enc1.Encode(somedata))
-		log.Println("Enc2:", enc2.Encode(somedata))
+		newLeft, newRight, err := h.handleIncomingData(left, right)
+		if err != nil {
+			log.Println(fmt.Errorf("SessionHandler.Handle: %v", err))
+		}
 
-		log.Println("buf1:", buf1)
-		log.Println("buf2:", buf2)
+		err = h.sendUpdatedData(newLeft, newRight)
+		if err != nil {
+			log.Println(fmt.Errorf("SessionHandler.Handle: %v", err))
+		}
 
-		log.Println("WebsockErr1:", sesh.player1.WriteMessage(websocket.TextMessage, buf1.Bytes()))
-		log.Println("WebsockErr2:", sesh.player2.WriteMessage(websocket.TextMessage, buf2.Bytes()))
-
-		buf1.Reset()
-		buf2.Reset()
-
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Millisecond * 8)
 	}
 }
 
-func newSessionHandler() *SessionHandler {
-	sessions := []Session{}
+func (h *SessionHandler) recvIncomingData(sesh Session) (left packet.PlayerStatePacket, right packet.PlayerStatePacket, err error) {
+	left, err = h.recvPlayerData(sesh.player1)
+	if err != nil {
+		return packet.PlayerStatePacket{}, packet.PlayerStatePacket{}, fmt.Errorf("recvIncomingData: %v", err)
+	}
 
+	right, err = h.recvPlayerData(sesh.player2)
+	if err != nil {
+		return packet.PlayerStatePacket{}, packet.PlayerStatePacket{}, fmt.Errorf("recvIncomingData: %v", err)
+	}
+
+	return left, right, nil
+}
+
+func (h *SessionHandler) recvPlayerData(player *websocket.Conn) (data packet.PlayerStatePacket, err error) {
+	// if err = player.SetReadDeadline(time.Now().Add(time.Second * 10)); err != nil {
+	// 	return data, fmt.Errorf("recvPlayerData: %v", err)
+	// }
+
+	if err = player.ReadJSON(&data); err != nil {
+		return data, fmt.Errorf("recvPlayerData: %v", err)
+	}
+
+	return data, nil
+}
+
+func (h *SessionHandler) handleIncomingData(left packet.PlayerStatePacket, right packet.PlayerStatePacket) (newLeft, newRight packet.ServerStatePacket, err error) {
+	return h.gameHandler.Handle(left, right)
+}
+
+func (h *SessionHandler) sendUpdatedData(left packet.ServerStatePacket, right packet.ServerStatePacket) error {
+	return nil
+}
+
+func newSessionHandler(gameHandler *GameHandler) *SessionHandler {
 	return &SessionHandler{
-		sessions: sessions,
+		gameHandler: gameHandler,
 	}
 }
