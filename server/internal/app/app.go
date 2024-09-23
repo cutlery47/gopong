@@ -1,17 +1,13 @@
 package app
 
 import (
-	"gopong/server/internal/handlers"
-	"gopong/server/internal/router"
+	"gopong/server/internal/game"
 	"gopong/server/internal/server"
-	"time"
 )
 
 func Run(configPath string) {
-	handler := handlers.NewWebsocketHandler()
+	game := game.New()
+	httpServer := server.New(game.Server)
 
-	router := router.NewRouter(handler)
-
-	s := server.New(router, server.ReadTimeout(time.Second*5))
-	s.Run()
+	httpServer.Run()
 }
