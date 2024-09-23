@@ -16,7 +16,7 @@ type PlayerStatus string
 
 var SearchingStatus PlayerStatus = "searching"
 var FoundStatus PlayerStatus = "found"
-var PlayingStatus PlayerSide = "playing"
+var PlayingStatus PlayerStatus = "playing"
 
 type PlayerSide string
 

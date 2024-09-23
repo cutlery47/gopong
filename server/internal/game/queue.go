@@ -10,10 +10,6 @@ import (
 
 type connQueue []connection
 
-func (cq connQueue) remove(i int) connQueue {
-	return append(cq[:i], cq[i+1:]...)
-}
-
 func (cq connQueue) findAndRemove(conn connection) (connQueue, error) {
 	for i, c := range cq {
 		if c.conn == conn.conn {
@@ -56,20 +52,17 @@ func (q *Queue) Accept() {
 func (q *Queue) Run() {
 	for {
 		log.Println("Current connections:", q.queue)
-		// waiting for connections
 		if len(q.queue) < 2 {
+			// waiting for connections
 			time.Sleep(200 * time.Millisecond)
 		} else {
+			// creating a gaming session
 			q.mu.Lock()
-			sesh := Session{
-				player1: q.queue[0],
-				player2: q.queue[1],
-			}
-
-			go sesh.handle()
-
+			sesh := NewSession(q.queue[0], q.queue[1])
 			q.queue = q.queue[2:]
 			q.mu.Unlock()
+
+			go sesh.handle()
 		}
 	}
 }
@@ -87,9 +80,10 @@ func (q *Queue) Manage(conn connection) {
 			q.queue, err = q.queue.findAndRemove(conn)
 			if err != nil {
 				log.Println(err)
+				conn.Close()
 			}
 			q.mu.Unlock()
+			return
 		}
-		return
 	}
 }
