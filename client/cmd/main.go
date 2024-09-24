@@ -6,7 +6,10 @@ import (
 )
 
 func main() {
-	if err := game.Run("./config/config.yaml"); err != nil {
-		log.Fatal(err)
+	client := game.NewLocalClient()
+
+	game := game.New(client)
+	if game == nil {
+		log.Println("Error when starting a client...")
 	}
 }
