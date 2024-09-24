@@ -1,41 +1,31 @@
 package game
 
-// type InputReader interface {
-// 	ReadLeft() KeyboardInputResult
-// 	ReadRight() KeyboardInputResult
-// }
+import "github.com/hajimehoshi/ebiten/v2"
 
-// type KeyboardInputResult struct {
-// 	up   bool
-// 	down bool
-// }
+type InputReader interface {
+	Read() KeyboardInputResult
+}
 
-// type KeyboardInputReader struct{}
+type KeyboardInputReader struct {
+	upKey   ebiten.Key
+	downKey ebiten.Key
+}
 
-// func (kir KeyboardInputReader) ReadLeft() KeyboardInputResult {
-// 	res := KeyboardInputResult{}
+func (kir KeyboardInputReader) Read() KeyboardInputResult {
+	res := KeyboardInputResult{}
 
-// 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-// 		res.up = true
-// 	}
+	if ebiten.IsKeyPressed(kir.upKey) {
+		res.up = true
+	}
 
-// 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-// 		res.down = true
-// 	}
+	if ebiten.IsKeyPressed(kir.downKey) {
+		res.down = true
+	}
 
-// 	return res
-// }
+	return res
+}
 
-// func (kir KeyboardInputReader) ReadRight() KeyboardInputResult {
-// 	res := KeyboardInputResult{}
-
-// 	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
-// 		res.up = true
-// 	}
-
-// 	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
-// 		res.down = true
-// 	}
-
-// 	return res
-// }
+type KeyboardInputResult struct {
+	up   bool
+	down bool
+}

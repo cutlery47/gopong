@@ -1,104 +1,72 @@
 package game
 
-import "log"
+import (
+	"gopong/client/internal/gui"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Updater interface {
-	Update() error
+	Update(window *gui.Window) error
 }
 
-type DefaultUpdater struct{}
-
-func NewDefaultUpdater() Updater {
-	return &DefaultUpdater{}
+type LocalUpdater struct {
+	leftReader  InputReader
+	rightReader InputReader
 }
 
-func (du *DefaultUpdater) Update() error {
-	log.Println("update")
+func NewLocalUpdater() *LocalUpdater {
+	return &LocalUpdater{
+		leftReader: KeyboardInputReader{
+			upKey:   ebiten.KeyW,
+			downKey: ebiten.KeyS,
+		},
+		rightReader: KeyboardInputReader{
+			upKey:   ebiten.KeyArrowUp,
+			downKey: ebiten.KeyArrowDown,
+		},
+	}
+}
+
+func (lu *LocalUpdater) Update(window *gui.Window) error {
+	leftInput := lu.leftReader.Read()
+	rightINput := lu.rightReader.Read()
+
+	lu.detectAndHandleCollision(window)
+
+	lu.movePlatform(leftInput, window.Left, window.Height())
+	lu.movePlatform(rightINput, window.Right, window.Height())
+	lu.moveBall(window.Ball)
+
 	return nil
 }
 
-// type Updater interface {
-// 	Update(*gui.Platform, *gui.Platform, *gui.Ball) error
-// }
+func (lu *LocalUpdater) detectAndHandleCollision(window *gui.Window) {
+	if window.Ball.OverlapsLeft(window.Left) || window.Ball.OverlapsRight(window.Right) {
+		window.Ball.PlatformCollide()
+	}
+	if window.Ball.OverlapsUpper() || window.Ball.OverlapsLower(window.Height()) {
+		window.Ball.BorderCollide()
+	}
+}
 
-// type LocalUpdater struct {
-// 	reader InputReader
-// }
+func (lu *LocalUpdater) movePlatform(res KeyboardInputResult, plat *gui.Platform, height int) {
+	var offset float64 = 0
 
-// func (u LocalUpdater) Update(cfg *config.Config, left *gui.Platform, right *gui.Platform, ball *gui.Ball) error {
-// 	u.detectAndHandleCollision(cfg, left, right, ball)
+	if res.up {
+		offset -= plat.Velocity()
+	}
+	if res.down {
+		offset += plat.Velocity()
+	}
 
-// 	left_offset := u.calcPlatformOffset(left.Velocity(), u.reader.ReadLeft())
-// 	right_offset := u.calcPlatformOffset(right.Velocity(), u.reader.ReadRight())
+	new_coord := plat.YCoord() + offset
 
-// 	u.movePlatform(left, left_offset, cfg.Window.Height)
-// 	u.movePlatform(right, right_offset, cfg.Window.Height)
-// 	u.moveBall(ball)
+	if new_coord >= 0 && new_coord <= float64(height-plat.Height()) {
+		plat.Move(offset)
+	}
+}
 
-// 	return nil
-// }
-
-// // detects ball-platform collision
-// // if detected - returns the platform which has collided with the ball
-// // else nil
-
-// func (u LocalUpdater) detectAndHandleCollision(cfg *config.Config, left *gui.Platform, right *gui.Platform, ball *gui.Ball) {
-// 	if u.detectPlatformCollision(left, right, ball) {
-// 		u.handlePlatformCollision(ball)
-// 	} else if u.detectBorderCollision(cfg, ball) {
-// 		u.handleBorderCollision(ball)
-// 	}
-// }
-
-// func (u LocalUpdater) detectPlatformCollision(left *gui.Platform, right *gui.Platform, ball *gui.Ball) bool {
-// 	if ball.OverlapsLeft(left) || ball.OverlapsRight(right) {
-// 		return true
-// 	}
-// 	return false
-// }
-
-// func (u LocalUpdater) handlePlatformCollision(ball *gui.Ball) {
-// 	ball.PlatformCollide()
-// }
-
-// func (u LocalUpdater) detectBorderCollision(cfg *config.Config, ball *gui.Ball) bool {
-// 	if ball.OverlapsUpper() || ball.OverlapsLower(cfg.Window.Height) {
-// 		return true
-// 	}
-// 	return false
-// }
-
-// func (u LocalUpdater) handleBorderCollision(ball *gui.Ball) {
-// 	ball.BorderCollide()
-// }
-
-// func (u LocalUpdater) calcPlatformOffset(vel float64, res KeyboardInputResult) float64 {
-// 	var offset float64
-// 	if res.up {
-// 		offset -= vel
-// 	}
-// 	if res.down {
-// 		offset += vel
-// 	}
-// 	return offset
-// }
-
-// func (u LocalUpdater) movePlatform(plat *gui.Platform, offset float64, height int) {
-// 	new_coord := plat.YCoord() + offset
-
-// 	if new_coord >= 0 && new_coord <= float64(height-plat.Height()) {
-// 		plat.Move(offset)
-// 	}
-// }
-
-// func (u LocalUpdater) moveBall(ball *gui.Ball) {
-// 	ball.Move()
-// }
-
-// func newLocalUpdater() *LocalUpdater {
-// 	updater := &LocalUpdater{
-// 		reader: KeyboardInputReader{},
-// 	}
-
-// 	return updater
-// }
+func (u LocalUpdater) moveBall(ball *gui.Ball) {
+	ball.Move()
+}

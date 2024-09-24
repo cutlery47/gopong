@@ -5,6 +5,7 @@ import (
 	"gopong/client/internal/gui"
 	"log"
 
+	"github.com/gorilla/websocket"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -19,14 +20,21 @@ type localClient struct {
 }
 
 func NewLocalClient() *localClient {
+	updater := NewLocalUpdater()
+	drawer := NewRenderer()
+
+	ebiten.SetWindowSize(1000, 500)
+	window := gui.NewWindow(1000, 500)
+
 	return &localClient{
-		updater: NewDefaultUpdater(),
-		window:  gui.NewWindow(100, 100),
+		updater: updater,
+		drawer:  drawer,
+		window:  window,
 	}
 }
 
 func (lc *localClient) Update() error {
-	err := lc.updater.Update()
+	err := lc.updater.Update(lc.window)
 	if err != nil {
 		return fmt.Errorf("lc.updater.Update: %v", err)
 	}
@@ -34,39 +42,45 @@ func (lc *localClient) Update() error {
 }
 
 func (lc *localClient) Draw(screen *ebiten.Image) {
-	err := lc.drawer.Draw()
-	if err != nil {
-		log.Println("lc.drawer.Draw():", err)
-	}
+	lc.drawer.Draw(lc.window, screen)
 }
 
 func (lc *localClient) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
 }
 
-// func (g *Game) Draw(screen *ebiten.Image) {
-// 	g.drawer.Draw(g.window.Platform_1, g.window.Platform_2, g.window.Ball, screen)
-// }
+type connection struct {
+	conn *websocket.Conn
+}
 
-// func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-// 	return outsideWidth, outsideHeight
-// }
+type multiplayerClient struct {
+	conn connection
+}
 
-// type MultiplayerClient struct {
-// 	conn *websocket.Conn
-// }
+func NewMultiplayerClient() *multiplayerClient {
+	dialer := websocket.DefaultDialer
+	conn, _, err := dialer.Dial("ws://localhost:8080", nil)
+	if err != nil {
+		log.Println("Couldn't dial:", err)
+		return nil
+	}
 
-// func NewClient() *Client {
-// 	dialer := websocket.DefaultDialer
-// 	conn, _, err := dialer.Dial("ws://localhost:8080", nil)
-// 	if err != nil {
-// 		log.Println(err)
-// 		return nil
-// 	}
+	client := &multiplayerClient{
+		conn: connection{conn: conn},
+	}
 
-// 	client := &Client{
-// 		conn: conn,
-// 	}
+	return client
+}
 
-// 	return client
-// }
+func (mc *multiplayerClient) Update() error {
+	log.Println("update")
+	return nil
+}
+
+func (mc *multiplayerClient) Draw(screen *ebiten.Image) {
+	log.Println("draw")
+}
+
+func (mc *multiplayerClient) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return outsideWidth, outsideHeight
+}

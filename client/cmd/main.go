@@ -10,6 +10,11 @@ func main() {
 
 	game := game.New(client)
 	if game == nil {
-		log.Println("Error when starting a client...")
+		log.Println("Error when starting a game...")
+	}
+
+	err := game.Run()
+	if err != nil {
+		log.Println("Runtime error:", err)
 	}
 }

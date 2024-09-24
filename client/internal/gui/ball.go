@@ -65,7 +65,6 @@ func (b *Ball) PlatformCollide() {
 
 func (b *Ball) BorderCollide() {
 	b.entity.HorizontalCollide()
-	b.entity.SpeedUp(1.025)
 }
 
 func NewBall(x_coord float64, y_coord float64, size int) *Ball {
