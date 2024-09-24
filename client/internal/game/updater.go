@@ -10,13 +10,13 @@ type Updater interface {
 	Update(window *gui.Window) error
 }
 
-type LocalUpdater struct {
+type localUpdater struct {
 	leftReader  InputReader
 	rightReader InputReader
 }
 
-func NewLocalUpdater() *LocalUpdater {
-	return &LocalUpdater{
+func NewLocalUpdater() *localUpdater {
+	return &localUpdater{
 		leftReader: KeyboardInputReader{
 			upKey:   ebiten.KeyW,
 			downKey: ebiten.KeyS,
@@ -28,7 +28,7 @@ func NewLocalUpdater() *LocalUpdater {
 	}
 }
 
-func (lu *LocalUpdater) Update(window *gui.Window) error {
+func (lu *localUpdater) Update(window *gui.Window) error {
 	leftInput := lu.leftReader.Read()
 	rightINput := lu.rightReader.Read()
 
@@ -41,7 +41,7 @@ func (lu *LocalUpdater) Update(window *gui.Window) error {
 	return nil
 }
 
-func (lu *LocalUpdater) detectAndHandleCollision(window *gui.Window) {
+func (lu *localUpdater) detectAndHandleCollision(window *gui.Window) {
 	if window.Ball.OverlapsLeft(window.Left) || window.Ball.OverlapsRight(window.Right) {
 		window.Ball.PlatformCollide()
 	}
@@ -50,7 +50,7 @@ func (lu *LocalUpdater) detectAndHandleCollision(window *gui.Window) {
 	}
 }
 
-func (lu *LocalUpdater) movePlatform(res KeyboardInputResult, plat *gui.Platform, height int) {
+func (lu *localUpdater) movePlatform(res KeyboardInputResult, plat *gui.Platform, height int) {
 	var offset float64 = 0
 
 	if res.up {
@@ -67,6 +67,32 @@ func (lu *LocalUpdater) movePlatform(res KeyboardInputResult, plat *gui.Platform
 	}
 }
 
-func (u LocalUpdater) moveBall(ball *gui.Ball) {
+func (u localUpdater) moveBall(ball *gui.Ball) {
 	ball.Move()
 }
+
+// type multiplayerUpdater struct {
+// 	statePipe <-chan pack.ServerPacket
+// 	inputPipe <-chan KeyboardInputResult
+// }
+
+// func NewMultiplayerUpdater(side string) *multiplayerUpdater {
+// 	return &multiplayerUpdater{}
+// }
+
+// func (mu *multiplayerUpdater) Update(window *gui.Window) error {
+// 	input := KeyboardInputResult{}
+
+// 	select {
+// 	case data := <-mu.inputPipe:
+// 		input = data
+// 	default:
+
+// 	}
+
+// 	clientState := pack.ClientPacket{
+
+// 	}
+
+// 	return nil
+// }

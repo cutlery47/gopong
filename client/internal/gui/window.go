@@ -1,5 +1,9 @@
 package gui
 
+import (
+	"gopong/client/internal/pack"
+)
+
 type Window struct {
 	height int
 	width  int
@@ -7,6 +11,12 @@ type Window struct {
 	Left  *Platform
 	Right *Platform
 	Ball  *Ball
+}
+
+func (w *Window) Update(state pack.ServerPacket) {
+	w.Left.SetPosition(state.State.LeftPosition.X, state.State.LeftPosition.Y)
+	w.Right.SetPosition(state.State.RightPosition.X, state.State.RightPosition.Y)
+	w.Ball.SetPosition(state.State.BallPosition.X, state.State.BallPosition.Y)
 }
 
 func (w *Window) Resolution() (int, int) {

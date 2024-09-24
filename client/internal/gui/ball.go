@@ -12,6 +12,10 @@ type Ball struct {
 	Image  *ebiten.Image
 }
 
+func (b *Ball) SetPosition(X, Y float64) {
+	b.entity.SetPosition(X, Y)
+}
+
 func (b Ball) Coordinates() (float64, float64) {
 	return b.entity.Coord().AsTuple()
 }

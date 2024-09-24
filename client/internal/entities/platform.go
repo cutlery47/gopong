@@ -27,6 +27,10 @@ func (p *Platform) Move(offset float64) {
 	p.coord.Y += offset
 }
 
+func (p *Platform) SetPosition(coord Vector) {
+	p.coord = coord
+}
+
 func NewPlatform(width int, height int, coord Vector) *Platform {
 	p := new(Platform)
 	p.width = width

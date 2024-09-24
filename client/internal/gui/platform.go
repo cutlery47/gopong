@@ -12,6 +12,11 @@ type Platform struct {
 	Image  *ebiten.Image
 }
 
+func (p *Platform) SetPosition(X float64, Y float64) {
+	pos := entities.Vector{X: X, Y: Y}
+	p.entity.SetPosition(pos)
+}
+
 func (p Platform) Coordinates() (float64, float64) {
 	return p.entity.Coord().AsTuple()
 }

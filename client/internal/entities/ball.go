@@ -27,6 +27,11 @@ func (b Ball) Velocity() float64 {
 	return math.Sqrt(math.Pow(dx, 2) + math.Pow(dy, 2))
 }
 
+func (b *Ball) SetPosition(X, Y float64) {
+	b.coord.X = X
+	b.coord.Y = Y
+}
+
 func (b *Ball) Move() {
 	b.coord.Add(b.movec)
 }

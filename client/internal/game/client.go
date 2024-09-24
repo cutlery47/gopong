@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"gopong/client/internal/gui"
+	"gopong/client/internal/pack"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -14,7 +15,7 @@ type Client interface {
 }
 
 type localClient struct {
-	updater Updater
+	updater *localUpdater
 	drawer  Drawer
 	window  *gui.Window
 }
@@ -50,37 +51,112 @@ func (lc *localClient) Layout(outsideWidth, outsideHeight int) (screenWidth, scr
 }
 
 type connection struct {
-	conn *websocket.Conn
+	conn      *websocket.Conn
+	statePipe chan<- pack.ServerPacket
+}
+
+func InitConnection(url string, pipe chan<- pack.ServerPacket) (connection, error) {
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		log.Printf("InitConnection: %v", err)
+		return connection{}, err
+	}
+
+	return connection{conn: conn, statePipe: pipe}, nil
+}
+
+func (c connection) Read(buff *pack.ServerPacket) error {
+	err := c.conn.ReadJSON(buff)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c connection) Send(pack pack.ClientPacket) (err error) {
+	err = c.conn.WriteJSON(pack)
+	if err != nil {
+		log.Println("connection.Send():", err)
+		return err
+	}
+	return err
+}
+
+func (c connection) SendACK() (err error) {
+	err = c.conn.WriteJSON(pack.ClientAck)
+	if err != nil {
+		log.Println("connection.SendACK():", err)
+		return err
+	}
+	return err
+}
+
+func (c connection) Listen() {
+	for {
+		state := pack.ServerPacket{}
+		c.Read(&state)
+		log.Println("SENDING")
+		c.statePipe <- state
+	}
 }
 
 type multiplayerClient struct {
-	conn connection
+	conn      connection
+	window    *gui.Window
+	drawer    Drawer
+	statePipe <-chan pack.ServerPacket
+	inputPipe <-chan KeyboardInputResult
 }
 
 func NewMultiplayerClient() *multiplayerClient {
-	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.Dial("ws://localhost:8080", nil)
+	inputPipe := make(chan KeyboardInputResult)
+	statePipe := make(chan pack.ServerPacket)
+
+	conn, err := InitConnection("ws://localhost:8080", statePipe)
 	if err != nil {
-		log.Println("Couldn't dial:", err)
 		return nil
 	}
 
+	window := gui.NewWindow(1000, 500)
+	ebiten.SetWindowSize(1000, 500)
+
 	client := &multiplayerClient{
-		conn: connection{conn: conn},
+		conn:      conn,
+		window:    window,
+		drawer:    NewRenderer(),
+		statePipe: statePipe,
+		inputPipe: inputPipe,
 	}
+
+	go conn.Listen()
+	go client.HandleInput()
 
 	return client
 }
 
+func (mc *multiplayerClient) HandleInput() {
+	// for {
+	// 	// input := <-mc.inputPipe
+
+	// }
+}
+
+// this is where game state updates
+// !!!this should probably only consume server data and update gui elements accordingly!!!
 func (mc *multiplayerClient) Update() error {
-	log.Println("update")
+	newState := <-mc.statePipe
+	log.Println(newState)
+	mc.window.Update(newState)
+
 	return nil
 }
 
+// this is where game state in rendered
 func (mc *multiplayerClient) Draw(screen *ebiten.Image) {
-	log.Println("draw")
+	mc.drawer.Draw(mc.window, screen)
 }
 
+// this is bs
 func (mc *multiplayerClient) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
 }
