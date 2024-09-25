@@ -1,21 +1,23 @@
 package game
 
-// pipes for passing connections back & forth between Queue and Server
-type inConnPipe chan<- connection
-type outConnPipe <-chan connection
+import (
+	"gopong/server/internal/game/conn"
+	"gopong/server/internal/game/queue"
+	"gopong/server/internal/game/server"
+)
 
 // the game itself
 type Game struct {
-	Server *Server
-	Queue  *Queue
+	Server *server.Server
+	Queue  *queue.Queue
 }
 
 func New() *Game {
-	// idk why 1024
-	connPipe := make(chan connection, 1024)
+	// idk y 1024
+	connPipe := make(chan conn.Connection, 1024)
 
-	server := NewServer(connPipe)
-	queue := NewQueue(connPipe)
+	server := server.New(connPipe)
+	queue := queue.New(connPipe)
 
 	go queue.Accept()
 	go queue.Run()

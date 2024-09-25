@@ -1,6 +1,7 @@
-package game
+package server
 
 import (
+	"gopong/server/internal/game/conn"
 	"log"
 	"net/http"
 
@@ -9,15 +10,16 @@ import (
 
 type Server struct {
 	upgrader websocket.Upgrader
-	pipe     inConnPipe
+	// channel for sending received connections
+	connPipe chan<- conn.Connection
 }
 
-func NewServer(pipe inConnPipe) *Server {
+func New(pipe chan<- conn.Connection) *Server {
 	upgrader := websocket.Upgrader{}
 
 	return &Server{
 		upgrader: upgrader,
-		pipe:     pipe,
+		connPipe: pipe,
 	}
 }
 
@@ -30,8 +32,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Printf("Received connection from %v", c.RemoteAddr())
 		// senging connection over to the queue
-		s.pipe <- connection{
-			conn: c,
-		}
+		conn := conn.New(c)
+		s.connPipe <- conn
 	}
 }

@@ -8,7 +8,7 @@ import (
 
 type Ball struct {
 	coord Vector
-	size  int
+	size  float64
 	movec Vector
 }
 
@@ -16,7 +16,7 @@ func (b Ball) Coord() Vector {
 	return b.coord
 }
 
-func (b Ball) Size() int {
+func (b Ball) Size() float64 {
 	return b.size
 }
 
@@ -43,11 +43,11 @@ func (b *Ball) HorizontalCollide() {
 	b.movec.Y = -b.movec.Y
 }
 
-func NewBall(radius int, coord Vector) *Ball {
+func NewBall(size float64, coord Vector) *Ball {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 
 	b := new(Ball)
-	b.size = radius
+	b.size = size
 	b.coord = coord
 	b.movec = Vector{}
 
