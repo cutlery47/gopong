@@ -18,14 +18,14 @@ func Init() *State {
 	canvasHeight := 500.0
 
 	ballSize := 10.0
-	platformWidth := 50.0
+	platformWidth := 20.0
 	platformHeight := 100.0
 
 	ballPosition := entities.NewVector(canvasWidth/2-ballSize/2, canvasHeight/2-ballSize/2)
 	leftPosition := entities.NewVector(platformWidth, canvasHeight/2-platformHeight/2)
-	rightPosition := entities.NewVector(canvasWidth-2*platformWidth, canvasHeight/2-platformWidth/2)
+	rightPosition := entities.NewVector(canvasWidth-2*platformWidth, canvasHeight/2-platformHeight/2)
 
-	canvas := entities.NewCanvas(canvasWidth, canvasWidth)
+	canvas := entities.NewCanvas(canvasWidth, canvasHeight)
 	ball := entities.NewBall(ballSize, *ballPosition)
 	left := entities.NewPlatform(platformWidth, platformHeight, *leftPosition)
 	right := entities.NewPlatform(platformWidth, platformHeight, *rightPosition)
@@ -79,5 +79,6 @@ func (s State) CanvasHeight() float64 {
 }
 
 func (s *State) Update(leftInput, rightInput protocol.ClientPacket) {
-	s.left.Move(3)
+	s.left.SetCoord(leftInput.Position.X, leftInput.Position.Y)
+	s.right.SetCoord(rightInput.Position.X, rightInput.Position.Y)
 }

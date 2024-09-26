@@ -52,29 +52,20 @@ func (s Session) prepareMatch() {
 }
 
 func (s Session) handleMatch() {
+	s.sendUpdatedState()
 	for {
-		leftInput := protocol.ClientPacket{}
-		rightInput := protocol.ClientPacket{}
-
-		select {
-		case data := <-s.left.inputCh:
-			leftInput = data
-			log.Println("received left")
-		case data := <-s.right.inputCh:
-			rightInput = data
-			log.Println("received right")
-		default:
-		}
+		leftInput := <-s.left.inputCh
+		rightInput := <-s.right.inputCh
 
 		s.state.Update(leftInput, rightInput)
 		s.sendUpdatedState()
 
-		time.Sleep(100 * time.Millisecond)
+		// approx 128 tickrate
+		time.Sleep(8 * time.Millisecond)
 	}
 }
 
 func (s *Session) sendUpdatedState() {
-
 	statePack := protocol.ServerState{
 		LeftPosition:  protocol.Vector(s.state.LeftCoord()),
 		RightPosition: protocol.Vector(s.state.RightCoord()),
@@ -130,6 +121,8 @@ func (p player) prepare(state state.State, side protocol.PlayerSide) {
 	if err := p.conn.ReadACK(); err != nil {
 		return
 	}
+
+	p.prepCh <- 1
 
 	go p.listen()
 }

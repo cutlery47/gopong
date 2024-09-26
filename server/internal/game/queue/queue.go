@@ -42,7 +42,7 @@ func (q *Queue) Accept() {
 // creating a new gaming session for each pair of connections in the queue
 func (q *Queue) Run() {
 	for {
-		log.Println("Current connections:", q.queue)
+		// log.Println("Current connections:", q.queue)
 		if len(q.queue) < 2 {
 			// waiting for connections
 			time.Sleep(200 * time.Millisecond)

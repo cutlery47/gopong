@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cutlery47/gopong/client/internal/gui"
 	"github.com/cutlery47/gopong/common/conn"
@@ -55,50 +54,70 @@ type multiplayerClient struct {
 	conn      conn.Connection
 	canvas    *gui.Canvas
 	drawer    Drawer
+	reader    KeyboardInputReader
+	side      string
 	statePipe <-chan protocol.ServerPacket
 	inputPipe <-chan KeyboardInputResult
 }
 
-func NewMultiplayerClient(conn conn.Connection) *multiplayerClient {
-	// inputPipe := make(chan KeyboardInputResult)
-	// statePipe := make(chan protocol.ServerPacket)
+func NewMultiplayerClient(conn conn.Connection, config protocol.GameConfig) *multiplayerClient {
+	inputPipe := make(chan KeyboardInputResult)
+	statePipe := make(chan protocol.ServerPacket)
 
-	// conn, err := InitConnection("ws://localhost:8080", statePipe)
-	// if err != nil {
-	// 	return nil
-	// }
+	canvas := gui.NewCanvasFromConfig(config)
+	ebiten.SetWindowSize(int(config.CanvasWidth), int(config.CanvasHeight))
 
-	// canvas := gui.NewWindow(1000, 500)
-	// ebiten.SetWindowSize(1000, 500)
+	var reader KeyboardInputReader
+	if config.Side == "left" {
+		reader = KeyboardInputReader{
+			upKey:   ebiten.KeyW,
+			downKey: ebiten.KeyS,
+		}
+	} else {
+		reader = KeyboardInputReader{
+			upKey:   ebiten.KeyArrowUp,
+			downKey: ebiten.KeyArrowDown,
+		}
+	}
 
-	// client := &multiplayerClient{
-	// 	conn:      conn,
-	// 	canvas:    canvas,
-	// 	drawer:    NewRenderer(),
-	// 	statePipe: statePipe,
-	// 	inputPipe: inputPipe,
-	// }
+	client := &multiplayerClient{
+		conn:      conn,
+		canvas:    canvas,
+		drawer:    NewRenderer(),
+		reader:    reader,
+		side:      string(config.Side),
+		statePipe: statePipe,
+		inputPipe: inputPipe,
+	}
 
-	// go conn.Listen()
-	// go client.HandleInput()
+	go conn.ListenFromServer(statePipe)
 
-	// return client
-	return nil
-}
-
-func (mc *multiplayerClient) HandleInput() {
-	// for {
-	// 	// input := <-mc.inputPipe
-
-	// }
+	return client
 }
 
 // this is where game state updates
 // !!!this should probably only consume server data and update gui elements accordingly!!!
 func (mc *multiplayerClient) Update() error {
 	newState := <-mc.statePipe
-	log.Println(newState)
 	mc.canvas.Update(newState)
+
+	pack := protocol.ClientPacket{}
+	if mc.side == "left" {
+		pack.Position = protocol.Vector{X: mc.canvas.Left.XCoord(), Y: mc.canvas.Left.YCoord()}
+	} else {
+		pack.Position = protocol.Vector{X: mc.canvas.Right.XCoord(), Y: mc.canvas.Right.YCoord()}
+	}
+
+	input := mc.reader.Read()
+	if input.up {
+		pack.Position.Y -= 5
+	}
+
+	if input.down {
+		pack.Position.Y += 5
+	}
+
+	mc.conn.Send(pack)
 
 	return nil
 }

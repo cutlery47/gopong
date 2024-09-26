@@ -7,6 +7,11 @@ type Platform struct {
 	velocity float64
 }
 
+func (p *Platform) SetCoord(x, y float64) {
+	p.coord.X = x
+	p.coord.Y = y
+}
+
 func (p Platform) Height() float64 {
 	return p.height
 }

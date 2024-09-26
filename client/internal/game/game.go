@@ -16,13 +16,13 @@ func RunLocalGame() {
 }
 
 func RunMultiplayerGame() {
-	conn, err := conn.InitConnection("ws://localhost:8080")
+	conn, config, err := conn.InitConnection("ws://localhost:8080")
 	if err != nil {
 		log.Println("Couldn't establish connection with the server...")
 		return
 	}
 
-	client := NewMultiplayerClient(conn)
+	client := NewMultiplayerClient(conn, config)
 	err = ebiten.RunGame(client)
 	if err != nil {
 		log.Printf("A runtime error occurred: %v", err)
