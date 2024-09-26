@@ -43,6 +43,37 @@ func (b *Ball) HorizontalCollide() {
 	b.movec.Y = -b.movec.Y
 }
 
+func (b *Ball) OverlapsLeft(plat *Platform) bool {
+	xOverlap := plat.coord.X-float64(plat.Width()) <= b.coord.X && b.coord.X <= plat.coord.X+float64(plat.Width())
+	yOverlap := plat.coord.Y <= b.coord.Y+float64(b.Size()) && b.coord.Y+float64(b.Size()) <= plat.coord.Y+float64(plat.Height())
+
+	return xOverlap && yOverlap
+}
+
+func (b *Ball) OverlapsRight(plat *Platform) bool {
+	xOverlap := plat.coord.X-float64(b.Size()) <= b.coord.X && b.coord.X <= plat.coord.X+float64(b.Size())
+	yOverlap := plat.coord.Y <= b.coord.Y+float64(b.Size()) && b.coord.Y+float64(b.Size()) <= plat.coord.Y+float64(plat.Height())
+
+	return xOverlap && yOverlap
+}
+
+func (b *Ball) OverlapsUpper() bool {
+	return b.coord.Y <= 0
+}
+
+func (b *Ball) OverlapsLower(height float64) bool {
+	return b.coord.Y >= height-b.Size()
+}
+
+func (b *Ball) PlatformCollide() {
+	b.VerticalCollide()
+	b.SpeedUp(1.025)
+}
+
+func (b *Ball) BorderCollide() {
+	b.HorizontalCollide()
+}
+
 func NewBall(size float64, coord Vector) *Ball {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 

@@ -31,7 +31,10 @@ func Init(c1, c2 conn.Connection) {
 
 func (s Session) handle() {
 	s.prepareMatch()
-	s.handleMatch()
+	for {
+		s.handleMatch()
+	}
+
 }
 
 func (s Session) prepareMatch() {
@@ -52,12 +55,20 @@ func (s Session) prepareMatch() {
 }
 
 func (s Session) handleMatch() {
+	s.state = state.Init()
 	s.sendUpdatedState()
 	for {
 		leftInput := <-s.left.inputCh
 		rightInput := <-s.right.inputCh
 
+		log.Println(leftInput, rightInput)
+
 		s.state.Update(leftInput, rightInput)
+
+		if s.state.Ball.Coord().X > s.state.CanvasWidth() || s.state.Ball.Coord().X < 0 {
+			return
+		}
+
 		s.sendUpdatedState()
 
 		// approx 128 tickrate
