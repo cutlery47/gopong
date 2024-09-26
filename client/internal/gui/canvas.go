@@ -8,27 +8,33 @@ type Canvas struct {
 	height int
 	width  int
 
-	Left  *Platform
-	Right *Platform
-	Ball  *Ball
+	left  *Platform
+	right *Platform
+	ball  *Ball
 }
 
-func (c *Canvas) Update(state protocol.ServerPacket) {
-	c.Left.SetPosition(state.State.LeftPosition.X, state.State.LeftPosition.Y)
-	c.Right.SetPosition(state.State.RightPosition.X, state.State.RightPosition.Y)
-	c.Ball.SetPosition(state.State.BallPosition.X, state.State.BallPosition.Y)
+func (c Canvas) Resolution() (int, int) {
+	return c.width, c.height
 }
 
-func (c *Canvas) Resolution() (int, int) {
-	return int(c.width), int(c.height)
-}
-
-func (c *Canvas) Height() int {
+func (c Canvas) Height() int {
 	return c.height
 }
 
-func (c *Canvas) Width() int {
+func (c Canvas) Width() int {
 	return c.width
+}
+
+func (c Canvas) Left() *Platform {
+	return c.left
+}
+
+func (c Canvas) Right() *Platform {
+	return c.right
+}
+
+func (c Canvas) Ball() *Ball {
+	return c.ball
 }
 
 func NewCanvas(width, height int) *Canvas {
@@ -42,11 +48,11 @@ func NewCanvas(width, height int) *Canvas {
 	plat_height := height / 5
 
 	// placing ball in the center
-	c.Ball = NewBall(float64(width)/2, float64(height)/2, ball_size)
+	c.ball = NewBall(float64(width)/2, float64(height)/2, ball_size)
 
 	// placing both platform on the opposite sides of the screen
-	c.Left = NewPlatform(float64(plat_width), float64(height)/2-float64(plat_height)/2, plat_width, plat_height)
-	c.Right = NewPlatform(float64(width)-2*float64(plat_width), float64(height)/2-float64(plat_height)/2, plat_width, plat_height)
+	c.left = NewPlatform(float64(plat_width), float64(height)/2-float64(plat_height)/2, plat_width, plat_height)
+	c.right = NewPlatform(float64(width)-2*float64(plat_width), float64(height)/2-float64(plat_height)/2, plat_width, plat_height)
 
 	return c
 }
@@ -57,9 +63,9 @@ func NewCanvasFromConfig(config protocol.GameConfig) *Canvas {
 	c.height = int(config.CanvasHeight)
 	c.width = int(config.CanvasWidth)
 
-	c.Ball = NewBall(config.BallPosition.X, config.BallPosition.Y, int(config.BallSize))
-	c.Left = NewPlatform(config.LeftPlatformPosition.X, config.LeftPlatformPosition.Y, int(config.LeftWidth), int(config.LeftHeight))
-	c.Right = NewPlatform(config.RightPlatformPosition.X, config.RightPlatformPosition.Y, int(config.RightWidth), int(config.RightHeight))
+	c.ball = NewBall(config.BallPosition.X, config.BallPosition.Y, int(config.BallSize))
+	c.left = NewPlatform(config.LeftPlatformPosition.X, config.LeftPlatformPosition.Y, int(config.LeftWidth), int(config.LeftHeight))
+	c.right = NewPlatform(config.RightPlatformPosition.X, config.RightPlatformPosition.Y, int(config.RightWidth), int(config.RightHeight))
 
 	return c
 }

@@ -3,12 +3,14 @@ package game
 import (
 	"log"
 
+	"github.com/cutlery47/gopong/client/internal/game/local"
+	"github.com/cutlery47/gopong/client/internal/game/multiplayer"
 	"github.com/cutlery47/gopong/common/conn"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func RunLocalGame() {
-	client := NewLocalClient()
+	client := local.NewClient()
 	err := ebiten.RunGame(client)
 	if err != nil {
 		log.Printf("A runtime error occurred: %v", err)
@@ -22,7 +24,7 @@ func RunMultiplayerGame() {
 		return
 	}
 
-	client := NewMultiplayerClient(conn, config)
+	client := multiplayer.NewMultiplayerClient(conn, config)
 	err = ebiten.RunGame(client)
 	if err != nil {
 		log.Printf("A runtime error occurred: %v", err)

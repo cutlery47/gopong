@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	game.RunMultiplayerGame()
+	game.RunLocalGame()
 }
