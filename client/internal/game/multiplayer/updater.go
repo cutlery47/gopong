@@ -7,14 +7,15 @@ import (
 )
 
 type Updater struct {
-	reader common.KeyboardInputReader
+	reader *common.KeyboardInputReader
 
 	statePipe <-chan protocol.ServerPacket
 }
 
-func NewUpdater(statePipe <-chan protocol.ServerPacket) *Updater {
+func NewUpdater(statePipe <-chan protocol.ServerPacket, reader *common.KeyboardInputReader) *Updater {
 	return &Updater{
 		statePipe: statePipe,
+		reader:    reader,
 	}
 }
 

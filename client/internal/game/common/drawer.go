@@ -17,10 +17,12 @@ func (r Renderer) Draw(canvas *gui.Canvas, screen *ebiten.Image) {
 	op_2 := &ebiten.DrawImageOptions{}
 	ball_op := &ebiten.DrawImageOptions{}
 
+	// locating objects on the canvas
 	op_1.GeoM.Translate(canvas.Left().Coordinates())
 	op_2.GeoM.Translate(canvas.Right().Coordinates())
 	ball_op.GeoM.Translate(canvas.Ball().Coordinates())
 
+	// rendering
 	screen.DrawImage(canvas.Left().Image, op_1)
 	screen.DrawImage(canvas.Right().Image, op_2)
 	screen.DrawImage(canvas.Ball().Image, ball_op)

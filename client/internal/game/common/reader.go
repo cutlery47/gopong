@@ -1,6 +1,10 @@
 package common
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type KeyboardInputReader struct {
 	UpKey   ebiten.Key
@@ -27,6 +31,8 @@ func (kir KeyboardInputReader) Read() KeyboardInputResult {
 	if ebiten.IsKeyPressed(kir.DownKey) {
 		res.Down = true
 	}
+
+	log.Println(res)
 
 	return res
 }

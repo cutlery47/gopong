@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// client for local play
 type localClient struct {
 	drawer  common.Drawer
 	updater common.Updater

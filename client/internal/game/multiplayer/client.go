@@ -25,16 +25,16 @@ func NewMultiplayerClient(conn conn.Connection, config protocol.GameConfig) *mul
 	inputPipe := make(chan common.KeyboardInputResult)
 	statePipe := make(chan protocol.ServerPacket)
 
-	updater := NewUpdater(statePipe)
-	drawer := common.NewRenderer()
-	side := string(config.Side)
-
 	var reader common.KeyboardInputReader
 	if config.Side == "left" {
 		reader = common.LeftKeyboardInputReader
 	} else {
 		reader = common.RightKeyboardInputReader
 	}
+
+	updater := NewUpdater(statePipe, &reader)
+	drawer := common.NewRenderer()
+	side := string(config.Side)
 
 	canvas := gui.NewCanvasFromConfig(config)
 	ebiten.SetWindowSize(int(config.CanvasWidth), int(config.CanvasHeight))
