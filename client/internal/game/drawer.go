@@ -1,13 +1,13 @@
 package game
 
 import (
-	"gopong/client/internal/gui"
+	"github.com/cutlery47/gopong/client/internal/gui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Drawer interface {
-	Draw(window *gui.Window, screen *ebiten.Image)
+	Draw(window *gui.Canvas, screen *ebiten.Image)
 }
 
 type Renderer struct{}
@@ -16,7 +16,7 @@ func NewRenderer() *Renderer {
 	return &Renderer{}
 }
 
-func (r Renderer) Draw(window *gui.Window, screen *ebiten.Image) {
+func (r Renderer) Draw(window *gui.Canvas, screen *ebiten.Image) {
 	op_1 := &ebiten.DrawImageOptions{}
 	op_2 := &ebiten.DrawImageOptions{}
 	ball_op := &ebiten.DrawImageOptions{}

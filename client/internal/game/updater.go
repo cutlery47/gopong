@@ -1,13 +1,13 @@
 package game
 
 import (
-	"gopong/client/internal/gui"
+	"github.com/cutlery47/gopong/client/internal/gui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Updater interface {
-	Update(window *gui.Window) error
+	Update(canvas *gui.Canvas) error
 }
 
 type localUpdater struct {
@@ -28,25 +28,25 @@ func NewLocalUpdater() *localUpdater {
 	}
 }
 
-func (lu *localUpdater) Update(window *gui.Window) error {
+func (lu *localUpdater) Update(canvas *gui.Canvas) error {
 	leftInput := lu.leftReader.Read()
 	rightINput := lu.rightReader.Read()
 
-	lu.detectAndHandleCollision(window)
+	lu.detectAndHandleCollision(canvas)
 
-	lu.movePlatform(leftInput, window.Left, window.Height())
-	lu.movePlatform(rightINput, window.Right, window.Height())
-	lu.moveBall(window.Ball)
+	lu.movePlatform(leftInput, canvas.Left, canvas.Height())
+	lu.movePlatform(rightINput, canvas.Right, canvas.Height())
+	lu.moveBall(canvas.Ball)
 
 	return nil
 }
 
-func (lu *localUpdater) detectAndHandleCollision(window *gui.Window) {
-	if window.Ball.OverlapsLeft(window.Left) || window.Ball.OverlapsRight(window.Right) {
-		window.Ball.PlatformCollide()
+func (lu *localUpdater) detectAndHandleCollision(canvas *gui.Canvas) {
+	if canvas.Ball.OverlapsLeft(canvas.Left) || canvas.Ball.OverlapsRight(canvas.Right) {
+		canvas.Ball.PlatformCollide()
 	}
-	if window.Ball.OverlapsUpper() || window.Ball.OverlapsLower(window.Height()) {
-		window.Ball.BorderCollide()
+	if canvas.Ball.OverlapsUpper() || canvas.Ball.OverlapsLower(canvas.Height()) {
+		canvas.Ball.BorderCollide()
 	}
 }
 
@@ -80,7 +80,7 @@ func (u localUpdater) moveBall(ball *gui.Ball) {
 // 	return &multiplayerUpdater{}
 // }
 
-// func (mu *multiplayerUpdater) Update(window *gui.Window) error {
+// func (mu *multiplayerUpdater) Update(canvas *gui.Window) error {
 // 	input := KeyboardInputResult{}
 
 // 	select {

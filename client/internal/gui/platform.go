@@ -1,8 +1,9 @@
 package gui
 
 import (
-	"gopong/client/internal/entities"
 	"image/color"
+
+	"github.com/cutlery47/gopong/client/internal/entities"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

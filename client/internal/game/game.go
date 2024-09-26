@@ -1,25 +1,31 @@
 package game
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/cutlery47/gopong/common/conn"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Game struct {
-	client Client
-}
-
-func New(client Client) *Game {
-	return &Game{
-		client: client,
-	}
-}
-
-func (g *Game) Run() error {
-	err := ebiten.RunGame(g.client)
+func RunLocalGame() {
+	client := NewLocalClient()
+	err := ebiten.RunGame(client)
 	if err != nil {
-		return fmt.Errorf("Game.Run(): %v", err)
+		log.Printf("A runtime error occurred: %v", err)
 	}
-	return nil
+}
+
+func RunMultiplayerGame() {
+	conn, err := conn.InitConnection("ws://localhost:8080")
+	if err != nil {
+		log.Println("Couldn't establish connection with the server...")
+		return
+	}
+
+	client := NewMultiplayerClient(conn)
+	err = ebiten.RunGame(client)
+	if err != nil {
+		log.Printf("A runtime error occurred: %v", err)
+		return
+	}
 }
