@@ -1,9 +1,10 @@
 package game
 
 import (
-	"gopong/server/internal/game/conn"
 	"gopong/server/internal/game/queue"
 	"gopong/server/internal/game/server"
+
+	"github.com/cutlery47/gopong/common/conn"
 )
 
 // the game itself

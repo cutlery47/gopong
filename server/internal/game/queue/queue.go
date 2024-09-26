@@ -1,11 +1,12 @@
 package queue
 
 import (
-	"gopong/server/internal/game/conn"
 	"gopong/server/internal/game/session"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/cutlery47/gopong/common/conn"
 )
 
 // queue for incoming websocket connections
@@ -22,9 +23,10 @@ type Queue struct {
 
 func New(pipe <-chan conn.Connection) *Queue {
 	return &Queue{
-		queue:    []conn.Connection{},
-		connPipe: pipe,
-		mu:       &sync.Mutex{},
+		queue:      []conn.Connection{},
+		mu:         &sync.Mutex{},
+		connPipe:   pipe,
+		exitListen: make(chan byte),
 	}
 }
 
@@ -59,7 +61,7 @@ func (q *Queue) Run() {
 // removing connections if any such signal received
 func (q *Queue) listenForRemoval(conn conn.Connection) {
 	select {
-	case <-conn.Pipe():
+	case <-conn.RemoveConnPipe():
 		q.mu.Lock()
 		q.queue.findAndRemove(conn)
 		q.mu.Unlock()

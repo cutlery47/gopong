@@ -11,3 +11,11 @@ func NewCanvas(width, height float64) *Canvas {
 		height: height,
 	}
 }
+
+func (c Canvas) Width() float64 {
+	return c.width
+}
+
+func (c Canvas) Height() float64 {
+	return c.height
+}

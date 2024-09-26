@@ -42,12 +42,40 @@ func (s State) LeftCoord() entities.Vector {
 	return s.left.Coord()
 }
 
+func (s State) LeftWidth() float64 {
+	return s.left.Width()
+}
+
+func (s State) LeftHeight() float64 {
+	return s.left.Height()
+}
+
 func (s State) RightCoord() entities.Vector {
 	return s.right.Coord()
 }
 
+func (s State) RightWidth() float64 {
+	return s.right.Width()
+}
+
+func (s State) RightHeight() float64 {
+	return s.right.Height()
+}
+
 func (s State) BallCoord() entities.Vector {
 	return s.ball.Coord()
+}
+
+func (s State) BallSize() float64 {
+	return s.ball.Size()
+}
+
+func (s State) CanvasWidth() float64 {
+	return s.canvas.Width()
+}
+
+func (s State) CanvasHeight() float64 {
+	return s.canvas.Height()
 }
 
 func (s *State) Update(leftInput, rightInput protocol.ClientPacket) {

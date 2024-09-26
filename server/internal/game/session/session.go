@@ -1,11 +1,11 @@
 package session
 
 import (
-	"gopong/server/internal/game/conn"
 	"gopong/server/internal/game/state"
 	"log"
 	"time"
 
+	"github.com/cutlery47/gopong/common/conn"
 	"github.com/cutlery47/gopong/common/protocol"
 )
 
@@ -17,7 +17,8 @@ type Session struct {
 
 func Init(c1, c2 conn.Connection) {
 	state := state.Init()
-	left, right := initPlayers(c1, c2)
+	left := initPlayer(c1)
+	right := initPlayer(c2)
 
 	session := Session{
 		left:  left,
@@ -34,8 +35,20 @@ func (s Session) handle() {
 }
 
 func (s Session) prepareMatch() {
-	go s.left.Listen()
-	go s.right.Listen()
+	go s.left.prepare(*s.state, "left")
+	go s.right.prepare(*s.state, "right")
+
+	leftReady := false
+	rightReady := false
+
+	for !leftReady || !rightReady {
+		select {
+		case <-s.left.prepCh:
+			leftReady = true
+		case <-s.right.prepCh:
+			rightReady = true
+		}
+	}
 }
 
 func (s Session) handleMatch() {
@@ -44,10 +57,10 @@ func (s Session) handleMatch() {
 		rightInput := protocol.ClientPacket{}
 
 		select {
-		case data := <-s.left.input:
+		case data := <-s.left.inputCh:
 			leftInput = data
 			log.Println("received left")
-		case data := <-s.right.input:
+		case data := <-s.right.inputCh:
 			rightInput = data
 			log.Println("received right")
 		default:
@@ -78,30 +91,55 @@ func (s *Session) sendUpdatedState() {
 }
 
 type player struct {
-	conn  conn.Connection
-	input chan protocol.ClientPacket
+	conn    conn.Connection
+	inputCh chan protocol.ClientPacket
+	prepCh  chan byte
 }
 
-func initPlayers(leftConn, rightConn conn.Connection) (left, right player) {
-	left = player{
-		conn:  leftConn,
-		input: make(chan protocol.ClientPacket),
+func initPlayer(conn conn.Connection) player {
+	player := player{
+		conn:    conn,
+		inputCh: make(chan protocol.ClientPacket),
+		prepCh:  make(chan byte),
 	}
 
-	right = player{
-		conn:  rightConn,
-		input: make(chan protocol.ClientPacket),
-	}
-
-	return left, right
+	return player
 }
 
-func (p player) Listen() {
+func (p player) prepare(state state.State, side protocol.PlayerSide) {
+	p.conn.Send(protocol.ServerPacket{Status: protocol.FoundStatus})
+	if err := p.conn.ReadACK(); err != nil {
+		return
+	}
+
+	config := protocol.GameConfig{
+		Side:                  side,
+		CanvasWidth:           state.CanvasWidth(),
+		CanvasHeight:          state.CanvasHeight(),
+		BallSize:              state.BallSize(),
+		LeftWidth:             state.LeftWidth(),
+		LeftHeight:            state.LeftHeight(),
+		RightHeight:           state.RightHeight(),
+		RightWidth:            state.RightWidth(),
+		BallPosition:          protocol.Vector(state.BallCoord()),
+		LeftPlatformPosition:  protocol.Vector(state.LeftCoord()),
+		RightPlatformPosition: protocol.Vector(state.RightCoord()),
+	}
+
+	p.conn.Send(config)
+	if err := p.conn.ReadACK(); err != nil {
+		return
+	}
+
+	go p.listen()
+}
+
+func (p player) listen() {
 	for {
 		data := protocol.ClientPacket{}
 		if err := p.conn.Read(&data); err != nil {
 			log.Println(err)
 		}
-		p.input <- data
+		p.inputCh <- data
 	}
 }

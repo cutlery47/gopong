@@ -1,9 +1,10 @@
 package server
 
 import (
-	"gopong/server/internal/game/conn"
 	"log"
 	"net/http"
+
+	"github.com/cutlery47/gopong/common/conn"
 
 	"github.com/gorilla/websocket"
 )
