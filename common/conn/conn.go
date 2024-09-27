@@ -116,3 +116,8 @@ func (c Connection) ListenFromServer(statePipe chan<- protocol.ServerPacket) {
 		statePipe <- data
 	}
 }
+
+type Pair struct {
+	Conn1 Connection
+	Conn2 Connection
+}
