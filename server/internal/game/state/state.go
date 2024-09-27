@@ -1,25 +1,27 @@
 package state
 
 import (
-	"gopong/server/internal/entities"
+	"github.com/cutlery47/gopong/server/config"
+	"github.com/cutlery47/gopong/server/internal/entities"
 
 	"github.com/cutlery47/gopong/common/protocol"
 )
 
 type State struct {
-	Left   *entities.Platform
-	Right  *entities.Platform
-	Ball   *entities.Ball
-	Canvas *entities.Canvas
+	Left   entities.Platform
+	Right  entities.Platform
+	Ball   entities.Ball
+	Canvas entities.Canvas
 }
 
-func Init() *State {
-	canvasWidth := 1000.0
-	canvasHeight := 500.0
+func Init(config config.GameConfig) *State {
+	canvasWidth := float64(config.CanvasConfig.Width)
+	canvasHeight := float64(config.CanvasConfig.Height)
 
-	ballSize := 10.0
-	platformWidth := 20.0
-	platformHeight := 100.0
+	ballSize := float64(config.BallConfig.Size)
+	platformWidth := float64(config.PlatformConfig.Width)
+	platformHeight := float64(config.PlatformConfig.Height)
+	platformSpeed := float64(config.PlatformConfig.Speed)
 
 	ballPosition := entities.NewVector(canvasWidth/2-ballSize/2, canvasHeight/2-ballSize/2)
 	leftPosition := entities.NewVector(platformWidth, canvasHeight/2-platformHeight/2)
@@ -27,14 +29,14 @@ func Init() *State {
 
 	Canvas := entities.NewCanvas(canvasWidth, canvasHeight)
 	Ball := entities.NewBall(ballSize, *ballPosition)
-	Left := entities.NewPlatform(platformWidth, platformHeight, *leftPosition)
-	Right := entities.NewPlatform(platformWidth, platformHeight, *rightPosition)
+	Left := entities.NewPlatform(platformWidth, platformHeight, *leftPosition, platformSpeed)
+	Right := entities.NewPlatform(platformWidth, platformHeight, *rightPosition, platformSpeed)
 
 	return &State{
-		Left:   Left,
-		Right:  Right,
-		Ball:   Ball,
-		Canvas: Canvas,
+		Left:   *Left,
+		Right:  *Right,
+		Ball:   *Ball,
+		Canvas: *Canvas,
 	}
 }
 
@@ -78,7 +80,7 @@ func (s State) CanvasHeight() float64 {
 	return s.Canvas.Height()
 }
 
-func (s *State) Update(leftInput, rightInput protocol.ClientPacket) {
+func (s *State) Update(leftInput, rightInput protocol.ClientPacket) bool {
 	if s.Ball.OverlapsLeft(s.Left) || s.Ball.OverlapsRight(s.Right) {
 		s.Ball.PlatformCollide()
 	}
@@ -86,7 +88,20 @@ func (s *State) Update(leftInput, rightInput protocol.ClientPacket) {
 		s.Ball.BorderCollide()
 	}
 
+	leftOffest := leftInput.Position.Y - s.LeftCoord().Y
+	rightOffset := rightInput.Position.Y - s.RightCoord().Y
+
 	s.Ball.Move()
-	s.Left.SetCoord(leftInput.Position.X, leftInput.Position.Y)
-	s.Right.SetCoord(rightInput.Position.X, rightInput.Position.Y)
+	if s.BallCoord().X <= 0 || s.BallCoord().X >= s.CanvasWidth() {
+		return true
+	}
+
+	if 0 <= s.Left.Coord().Y+leftOffest && s.LeftCoord().Y+leftOffest+s.Left.Height() <= s.CanvasHeight() {
+		s.Left.Move(leftOffest)
+	}
+	if 0 <= s.Right.Coord().Y+rightOffset && s.RightCoord().Y+rightOffset+s.Right.Height() <= s.CanvasHeight() {
+		s.Right.Move(rightOffset)
+	}
+
+	return false
 }

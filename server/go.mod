@@ -1,4 +1,4 @@
-module gopong/server
+module github.com/cutlery47/gopong/server
 
 go 1.23.0
 

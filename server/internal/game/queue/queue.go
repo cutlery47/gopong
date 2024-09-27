@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"gopong/server/internal/game/session"
 	"log"
 	"sync"
 	"time"
@@ -17,15 +16,18 @@ type Queue struct {
 
 	// channel for receiving connections
 	connPipe <-chan conn.Connection
+	// channel for sending connections towards SessionHandler
+	seshPipe chan<- conn.Pair
 	// exit channel for Close() calls listener
 	exitListen chan byte
 }
 
-func New(pipe <-chan conn.Connection) *Queue {
+func New(connPipe <-chan conn.Connection, seshPipe chan<- conn.Pair) *Queue {
 	return &Queue{
 		queue:      []conn.Connection{},
 		mu:         &sync.Mutex{},
-		connPipe:   pipe,
+		connPipe:   connPipe,
+		seshPipe:   seshPipe,
 		exitListen: make(chan byte),
 	}
 }
@@ -51,7 +53,7 @@ func (q *Queue) Run() {
 			q.exitListen <- 1
 			// creating a gaming session
 			q.mu.Lock()
-			go session.Init(q.queue[0], q.queue[1])
+			q.seshPipe <- conn.Pair{Conn1: q.queue[0], Conn2: q.queue[1]}
 			q.queue = q.queue[2:]
 			q.mu.Unlock()
 		}

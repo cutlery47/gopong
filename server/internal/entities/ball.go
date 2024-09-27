@@ -43,14 +43,14 @@ func (b *Ball) HorizontalCollide() {
 	b.movec.Y = -b.movec.Y
 }
 
-func (b *Ball) OverlapsLeft(plat *Platform) bool {
+func (b *Ball) OverlapsLeft(plat Platform) bool {
 	xOverlap := plat.coord.X-float64(plat.Width()) <= b.coord.X && b.coord.X <= plat.coord.X+float64(plat.Width())
 	yOverlap := plat.coord.Y <= b.coord.Y+float64(b.Size()) && b.coord.Y+float64(b.Size()) <= plat.coord.Y+float64(plat.Height())
 
 	return xOverlap && yOverlap
 }
 
-func (b *Ball) OverlapsRight(plat *Platform) bool {
+func (b *Ball) OverlapsRight(plat Platform) bool {
 	xOverlap := plat.coord.X-float64(b.Size()) <= b.coord.X && b.coord.X <= plat.coord.X+float64(b.Size())
 	yOverlap := plat.coord.Y <= b.coord.Y+float64(b.Size()) && b.coord.Y+float64(b.Size()) <= plat.coord.Y+float64(plat.Height())
 

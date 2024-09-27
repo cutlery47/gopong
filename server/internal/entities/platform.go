@@ -32,12 +32,12 @@ func (p *Platform) Move(offset float64) {
 	p.coord.Y += offset
 }
 
-func NewPlatform(width float64, height float64, coord Vector) *Platform {
+func NewPlatform(width float64, height float64, coord Vector, velocity float64) *Platform {
 	p := new(Platform)
 	p.width = width
 	p.height = height
 	p.coord = coord
-	p.velocity = 10
+	p.velocity = velocity
 
 	return p
 }

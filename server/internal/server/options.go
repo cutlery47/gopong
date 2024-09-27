@@ -1,6 +1,7 @@
 package server
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -27,5 +28,11 @@ func ShutdownTimeout(timeout time.Duration) Option {
 func Addr(addr string) Option {
 	return func(s *Server) {
 		s.server.Addr = addr
+	}
+}
+
+func HostPortAddr(host string, port int) Option {
+	return func(s *Server) {
+		s.server.Addr = host + ":" + strconv.Itoa(port)
 	}
 }

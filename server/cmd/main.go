@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gopong/server/internal/app"
+	"github.com/cutlery47/gopong/server/internal/app"
 )
 
 func main() {
-	app.Run("./server/config/config.yaml")
+	app.Run("config/config.json")
 }

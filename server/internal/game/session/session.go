@@ -1,35 +1,39 @@
 package session
 
 import (
-	"gopong/server/internal/game/state"
 	"log"
 	"time"
+
+	"github.com/cutlery47/gopong/server/config"
+	"github.com/cutlery47/gopong/server/internal/game/state"
 
 	"github.com/cutlery47/gopong/common/conn"
 	"github.com/cutlery47/gopong/common/protocol"
 )
 
 type Session struct {
-	left  player
-	right player
-	state *state.State
+	left      player
+	right     player
+	currState *state.State
+	initState *state.State
 }
 
-func Init(c1, c2 conn.Connection) {
-	state := state.Init()
+func InitSession(c1, c2 conn.Connection, config config.GameConfig) Session {
+	initState := state.Init(config)
 	left := initPlayer(c1)
 	right := initPlayer(c2)
 
 	session := Session{
-		left:  left,
-		right: right,
-		state: state,
+		left:      left,
+		right:     right,
+		currState: &state.State{},
+		initState: initState,
 	}
 
-	session.handle()
+	return session
 }
 
-func (s Session) handle() {
+func (s Session) Run() {
 	s.prepareMatch()
 	for {
 		s.handleMatch()
@@ -38,8 +42,8 @@ func (s Session) handle() {
 }
 
 func (s Session) prepareMatch() {
-	go s.left.prepare(*s.state, "left")
-	go s.right.prepare(*s.state, "right")
+	go s.left.prepare(*s.initState, "left")
+	go s.right.prepare(*s.initState, "right")
 
 	leftReady := false
 	rightReady := false
@@ -55,32 +59,27 @@ func (s Session) prepareMatch() {
 }
 
 func (s Session) handleMatch() {
-	s.state = state.Init()
-	s.sendUpdatedState()
+	*s.currState = *s.initState
 	for {
+		s.sendCurrentState()
+
 		leftInput := <-s.left.inputCh
 		rightInput := <-s.right.inputCh
 
-		log.Println(leftInput, rightInput)
-
-		s.state.Update(leftInput, rightInput)
-
-		if s.state.Ball.Coord().X > s.state.CanvasWidth() || s.state.Ball.Coord().X < 0 {
+		if exit := s.currState.Update(leftInput, rightInput); exit {
 			return
 		}
-
-		s.sendUpdatedState()
 
 		// approx 128 tickrate
 		time.Sleep(8 * time.Millisecond)
 	}
 }
 
-func (s *Session) sendUpdatedState() {
+func (s *Session) sendCurrentState() {
 	statePack := protocol.ServerState{
-		LeftPosition:  protocol.Vector(s.state.LeftCoord()),
-		RightPosition: protocol.Vector(s.state.RightCoord()),
-		BallPosition:  protocol.Vector(s.state.BallCoord()),
+		LeftPosition:  protocol.Vector(s.currState.LeftCoord()),
+		RightPosition: protocol.Vector(s.currState.RightCoord()),
+		BallPosition:  protocol.Vector(s.currState.BallCoord()),
 	}
 
 	serverPack := protocol.ServerPacket{
