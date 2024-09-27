@@ -1,0 +1,23 @@
+{
+    "GameConfig": {
+        "CanvasConfig": {
+        "Width": 1000,
+        "Height": 500
+        },
+        "PlatformConfig": {
+            "Width": 20,
+            "Height": 100,
+            "Speed": 10
+        },
+        "BallConfig": {
+            "Size": 10
+        },
+        "GameServerConfig": {
+            "Tickrate": 128
+        }
+    },
+    "WebServerConfig": {
+        "Host": "localhost",
+        "Port": 8080
+    }
+}
