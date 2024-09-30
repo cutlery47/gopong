@@ -32,6 +32,8 @@ func NewMultiplayerClient(conn conn.Connection, config protocol.GameConfig) *mul
 		reader = common.RightKeyboardInputReader
 	}
 
+	ebiten.SetTPS(128)
+
 	updater := NewUpdater(statePipe, &reader)
 	drawer := common.NewRenderer()
 	side := string(config.Side)

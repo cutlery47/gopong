@@ -12,9 +12,10 @@ import (
 )
 
 type Session struct {
-	left  player
-	right player
-	state *state.State
+	left      player
+	right     player
+	state     *state.State
+	tickSleep time.Duration
 
 	config config.GameConfig
 }
@@ -23,11 +24,14 @@ func InitSession(c1, c2 conn.Connection, config config.GameConfig) Session {
 	left := initPlayer(c1)
 	right := initPlayer(c2)
 
+	tickSleep := time.Duration(1.0/float64(config.GameServerConfig.Tickrate)*1000) * time.Millisecond
+
 	session := Session{
-		left:   left,
-		right:  right,
-		state:  &state.State{},
-		config: config,
+		left:      left,
+		right:     right,
+		state:     &state.State{},
+		config:    config,
+		tickSleep: tickSleep,
 	}
 
 	return session
@@ -68,8 +72,7 @@ func (s Session) handleMatch() {
 
 		exit = s.state.Update(leftInput, rightInput)
 
-		// approx 128 tickrate
-		time.Sleep(8 * time.Millisecond)
+		time.Sleep(s.tickSleep)
 	}
 
 }

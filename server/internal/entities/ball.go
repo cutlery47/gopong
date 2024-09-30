@@ -84,9 +84,9 @@ func NewBall(size float64, coord Vector) *Ball {
 
 	// randomizing initial ball direction
 	if directX := r.Intn(2); directX == 0 {
-		b.movec.X = -5.0
+		b.movec.X = -2.5
 	} else {
-		b.movec.X = 5.0
+		b.movec.X = 2.5
 	}
 
 	if directY := r.Intn(2); directY == 0 {

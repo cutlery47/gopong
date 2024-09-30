@@ -3,6 +3,7 @@ package conn
 import (
 	"errors"
 	"log"
+	"time"
 
 	"github.com/cutlery47/gopong/common/protocol"
 	"github.com/gorilla/websocket"
@@ -111,10 +112,20 @@ func (c Connection) RemoteAddr() string {
 }
 
 func (c Connection) ListenFromServer(statePipe chan<- protocol.ServerPacket) {
+	cnt := 0
+	ticker := time.NewTicker(1 * time.Second)
 	for {
 		data := protocol.ServerPacket{}
 		c.Read(&data)
 		statePipe <- data
+
+		select {
+		case <-ticker.C:
+			log.Println("Received packets:", cnt)
+			cnt = 0
+		default:
+			cnt += 1
+		}
 	}
 }
 

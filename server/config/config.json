@@ -7,10 +7,10 @@
         "PlatformConfig": {
             "Width": 20,
             "Height": 80,
-            "Speed": 10
+            "Speed": 5
         },
         "BallConfig": {
-            "Size": 10
+            "Size": 20
         },
         "GameServerConfig": {
             "Tickrate": 128
