@@ -3,6 +3,7 @@ package local
 import (
 	"fmt"
 
+	"github.com/cutlery47/gopong/client/config"
 	"github.com/cutlery47/gopong/client/internal/game/common"
 	"github.com/cutlery47/gopong/client/internal/gui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,9 +16,11 @@ type localClient struct {
 	canvas  *gui.Canvas
 }
 
-func NewClient() *localClient {
+func NewClient(cliConfig config.GameConfig) *localClient {
 	updater := NewLocalUpdater()
 	drawer := common.NewRenderer()
+
+	ebiten.SetTPS(cliConfig.MaxTPS)
 
 	ebiten.SetWindowSize(1000, 500)
 	canvas := gui.NewCanvas(1000, 500)

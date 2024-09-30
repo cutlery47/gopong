@@ -1,0 +1,9 @@
+{
+    "WebServerConfig": {
+        "Host": "localhost",
+        "Port": 8080
+    }, 
+    "GameConfig": {
+        "MaxTPS": 128
+    }
+}

@@ -1,6 +1,7 @@
 package multiplayer
 
 import (
+	"github.com/cutlery47/gopong/client/config"
 	"github.com/cutlery47/gopong/client/internal/game/common"
 	"github.com/cutlery47/gopong/client/internal/gui"
 	"github.com/cutlery47/gopong/common/conn"
@@ -21,25 +22,25 @@ type multiplayerClient struct {
 	inputPipe <-chan common.KeyboardInputResult
 }
 
-func NewMultiplayerClient(conn conn.Connection, config protocol.GameConfig) *multiplayerClient {
+func NewMultiplayerClient(conn conn.Connection, servConfig protocol.GameConfig, cliConfig config.GameConfig) *multiplayerClient {
 	inputPipe := make(chan common.KeyboardInputResult)
 	statePipe := make(chan protocol.ServerPacket)
 
 	var reader common.KeyboardInputReader
-	if config.Side == "left" {
+	if servConfig.Side == "left" {
 		reader = common.LeftKeyboardInputReader
 	} else {
 		reader = common.RightKeyboardInputReader
 	}
 
-	ebiten.SetTPS(128)
+	ebiten.SetTPS(cliConfig.MaxTPS)
 
 	updater := NewUpdater(statePipe, &reader)
 	drawer := common.NewRenderer()
-	side := string(config.Side)
+	side := string(servConfig.Side)
 
-	canvas := gui.NewCanvasFromConfig(config)
-	ebiten.SetWindowSize(int(config.CanvasWidth), int(config.CanvasHeight))
+	canvas := gui.NewCanvasFromConfig(servConfig)
+	ebiten.SetWindowSize(int(servConfig.CanvasWidth), int(servConfig.CanvasHeight))
 
 	client := &multiplayerClient{
 		updater:   updater,

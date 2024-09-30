@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	game.RunMultiplayerGame()
+	game.RunMultiplayerGame("config/config.json")
 }
