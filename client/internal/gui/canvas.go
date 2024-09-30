@@ -63,9 +63,9 @@ func NewCanvasFromConfig(config protocol.GameConfig) *Canvas {
 	c.height = int(config.CanvasHeight)
 	c.width = int(config.CanvasWidth)
 
-	c.ball = NewBall(config.BallPosition.X, config.BallPosition.Y, int(config.BallSize))
-	c.left = NewPlatform(config.LeftPlatformPosition.X, config.LeftPlatformPosition.Y, int(config.LeftWidth), int(config.LeftHeight))
-	c.right = NewPlatform(config.RightPlatformPosition.X, config.RightPlatformPosition.Y, int(config.RightWidth), int(config.RightHeight))
+	c.ball = NewBall(0, 0, int(config.BallSize))
+	c.left = NewPlatform(0, 0, int(config.PlatformWidth), int(config.PlatformHeight))
+	c.right = NewPlatform(0, 0, int(config.PlatformWidth), int(config.PlatformHeight))
 
 	return c
 }

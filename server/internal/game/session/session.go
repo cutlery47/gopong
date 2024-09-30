@@ -12,22 +12,22 @@ import (
 )
 
 type Session struct {
-	left      player
-	right     player
-	currState *state.State
-	initState *state.State
+	left  player
+	right player
+	state *state.State
+
+	config config.GameConfig
 }
 
 func InitSession(c1, c2 conn.Connection, config config.GameConfig) Session {
-	initState := state.Init(config)
 	left := initPlayer(c1)
 	right := initPlayer(c2)
 
 	session := Session{
-		left:      left,
-		right:     right,
-		currState: &state.State{},
-		initState: initState,
+		left:   left,
+		right:  right,
+		state:  &state.State{},
+		config: config,
 	}
 
 	return session
@@ -42,8 +42,8 @@ func (s Session) Run() {
 }
 
 func (s Session) prepareMatch() {
-	go s.left.prepare(*s.initState, "left")
-	go s.right.prepare(*s.initState, "right")
+	go s.left.prepare(s.config, "left")
+	go s.right.prepare(s.config, "right")
 
 	leftReady := false
 	rightReady := false
@@ -59,27 +59,26 @@ func (s Session) prepareMatch() {
 }
 
 func (s Session) handleMatch() {
-	*s.currState = *s.initState
-	for {
+	s.state = state.Init(s.config)
+	for exit := false; !exit; {
 		s.sendCurrentState()
 
 		leftInput := <-s.left.inputCh
 		rightInput := <-s.right.inputCh
 
-		if exit := s.currState.Update(leftInput, rightInput); exit {
-			return
-		}
+		exit = s.state.Update(leftInput, rightInput)
 
 		// approx 128 tickrate
 		time.Sleep(8 * time.Millisecond)
 	}
+
 }
 
 func (s *Session) sendCurrentState() {
 	statePack := protocol.ServerState{
-		LeftPosition:  protocol.Vector(s.currState.LeftCoord()),
-		RightPosition: protocol.Vector(s.currState.RightCoord()),
-		BallPosition:  protocol.Vector(s.currState.BallCoord()),
+		LeftPosition:  protocol.Vector(s.state.LeftCoord()),
+		RightPosition: protocol.Vector(s.state.RightCoord()),
+		BallPosition:  protocol.Vector(s.state.BallCoord()),
 	}
 
 	serverPack := protocol.ServerPacket{
@@ -107,27 +106,22 @@ func initPlayer(conn conn.Connection) player {
 	return player
 }
 
-func (p player) prepare(state state.State, side protocol.PlayerSide) {
+func (p player) prepare(config config.GameConfig, side protocol.PlayerSide) {
 	p.conn.Send(protocol.ServerPacket{Status: protocol.FoundStatus})
 	if err := p.conn.ReadACK(); err != nil {
 		return
 	}
 
-	config := protocol.GameConfig{
-		Side:                  side,
-		CanvasWidth:           state.CanvasWidth(),
-		CanvasHeight:          state.CanvasHeight(),
-		BallSize:              state.BallSize(),
-		LeftWidth:             state.LeftWidth(),
-		LeftHeight:            state.LeftHeight(),
-		RightHeight:           state.RightHeight(),
-		RightWidth:            state.RightWidth(),
-		BallPosition:          protocol.Vector(state.BallCoord()),
-		LeftPlatformPosition:  protocol.Vector(state.LeftCoord()),
-		RightPlatformPosition: protocol.Vector(state.RightCoord()),
+	configPack := protocol.GameConfig{
+		Side:           side,
+		CanvasWidth:    float64(config.CanvasConfig.Width),
+		CanvasHeight:   float64(config.CanvasConfig.Height),
+		BallSize:       float64(config.BallConfig.Size),
+		PlatformWidth:  float64(config.PlatformConfig.Width),
+		PlatformHeight: float64(config.PlatformConfig.Height),
 	}
 
-	p.conn.Send(config)
+	p.conn.Send(configPack)
 	if err := p.conn.ReadACK(); err != nil {
 		return
 	}

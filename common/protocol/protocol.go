@@ -1,17 +1,12 @@
 package protocol
 
 type GameConfig struct {
-	Side                  PlayerSide
-	CanvasWidth           float64
-	CanvasHeight          float64
-	BallSize              float64
-	LeftWidth             float64
-	LeftHeight            float64
-	RightWidth            float64
-	RightHeight           float64
-	BallPosition          Vector
-	LeftPlatformPosition  Vector
-	RightPlatformPosition Vector
+	Side           PlayerSide
+	CanvasWidth    float64
+	CanvasHeight   float64
+	BallSize       float64
+	PlatformWidth  float64
+	PlatformHeight float64
 }
 
 type PlayerSide string
