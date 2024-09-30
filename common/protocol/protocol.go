@@ -33,7 +33,8 @@ var PlayingStatus PlayerStatus = "playing"
 
 // Client Message
 type ClientPacket struct {
-	Position Vector
+	InputUp   bool
+	InputDown bool
 }
 
 var ClientAck string = "ACK"

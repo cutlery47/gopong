@@ -50,8 +50,9 @@ func InitConnection(url string) (Connection, protocol.GameConfig, error) {
 	// waiting for game
 	res := protocol.ServerPacket{}
 	for res.Status != protocol.FoundStatus {
-		conn.Read(&res)
 		log.Println("In queue...")
+		conn.Read(&res)
+
 	}
 	conn.Send("ack")
 
