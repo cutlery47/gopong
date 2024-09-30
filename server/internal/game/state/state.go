@@ -88,16 +88,32 @@ func (s *State) Update(leftInput, rightInput protocol.ClientPacket) bool {
 		s.Ball.BorderCollide()
 	}
 
-	leftOffest := leftInput.Position.Y - s.LeftCoord().Y
-	rightOffset := rightInput.Position.Y - s.RightCoord().Y
+	leftOffset := 0.0
+	rightOffset := 0.0
+
+	if leftInput.InputUp {
+		leftOffset -= s.Left.Velocity()
+	}
+
+	if leftInput.InputDown {
+		leftOffset += s.Left.Velocity()
+	}
+
+	if rightInput.InputUp {
+		rightOffset -= s.Right.Velocity()
+	}
+
+	if rightInput.InputDown {
+		rightOffset += s.Right.Velocity()
+	}
 
 	s.Ball.Move()
 	if s.BallCoord().X <= 0 || s.BallCoord().X >= s.CanvasWidth() {
 		return true
 	}
 
-	if 0 <= s.Left.Coord().Y+leftOffest && s.LeftCoord().Y+leftOffest+s.Left.Height() <= s.CanvasHeight() {
-		s.Left.Move(leftOffest)
+	if 0 <= s.Left.Coord().Y+leftOffset && s.LeftCoord().Y+leftOffset+s.Left.Height() <= s.CanvasHeight() {
+		s.Left.Move(leftOffset)
 	}
 	if 0 <= s.Right.Coord().Y+rightOffset && s.RightCoord().Y+rightOffset+s.Right.Height() <= s.CanvasHeight() {
 		s.Right.Move(rightOffset)

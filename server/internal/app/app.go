@@ -15,8 +15,6 @@ func Run(configPath string) {
 		return
 	}
 
-	config.Print()
-
 	host := config.WebServerConfig.Host
 	port := config.WebServerConfig.Port
 
