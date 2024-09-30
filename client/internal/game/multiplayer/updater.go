@@ -27,18 +27,13 @@ func (u *Updater) Update(canvas *gui.Canvas) error {
 
 func (u *Updater) PackState(side string, canvas *gui.Canvas) protocol.ClientPacket {
 	pack := protocol.ClientPacket{}
-	if side == "left" {
-		pack.Position = protocol.Vector{X: canvas.Left().XCoord(), Y: canvas.Left().YCoord()}
-	} else {
-		pack.Position = protocol.Vector{X: canvas.Right().XCoord(), Y: canvas.Right().YCoord()}
-	}
 
 	input := u.reader.Read()
 	if input.Up {
-		pack.Position.Y -= 5
+		pack.InputUp = true
 	}
 	if input.Down {
-		pack.Position.Y += 5
+		pack.InputDown = true
 	}
 
 	return pack

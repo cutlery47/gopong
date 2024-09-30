@@ -1,8 +1,6 @@
 package common
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -31,8 +29,6 @@ func (kir KeyboardInputReader) Read() KeyboardInputResult {
 	if ebiten.IsKeyPressed(kir.DownKey) {
 		res.Down = true
 	}
-
-	log.Println(res)
 
 	return res
 }
