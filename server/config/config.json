@@ -1,12 +1,12 @@
 {
     "GameConfig": {
         "CanvasConfig": {
-        "Width": 640,
-        "Height": 480
+        "Width": 800,
+        "Height": 500
         },
         "PlatformConfig": {
             "Width": 20,
-            "Height": 80,
+            "Height": 100,
             "Speed": 5
         },
         "BallConfig": {

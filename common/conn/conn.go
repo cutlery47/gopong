@@ -2,6 +2,7 @@ package conn
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -38,7 +39,9 @@ func New(wc *websocket.Conn) Connection {
 	return conn
 }
 
-func InitConnection(url string) (Connection, protocol.GameConfig, error) {
+func InitConnection(host string, port string) (Connection, protocol.GameConfig, error) {
+	url := fmt.Sprintf("ws://%v:%v", host, port)
+
 	// connecting
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
@@ -63,8 +66,6 @@ func InitConnection(url string) (Connection, protocol.GameConfig, error) {
 	config := protocol.GameConfig{}
 	conn.Read(&config)
 	conn.Send("ack")
-
-	log.Println("Config:", config)
 
 	return conn, config, err
 }

@@ -59,5 +59,5 @@ func FromFile(configPath string) (Config, error) {
 }
 
 func (conf *Config) Print() {
-	log.Printf("%v+\n", *conf)
+	log.Printf("%+v\n", *conf)
 }
