@@ -14,7 +14,8 @@ func NewRenderer(canvas *Canvas) *Renderer {
 	}
 }
 
-func (r *Renderer) Draw(state State, screen *ebiten.Image) {
+func (r *Renderer) Draw(screen *ebiten.Image) {
+	// log.Printf("%+v\n", r.canvas.state)
 	op_1 := &ebiten.DrawImageOptions{}
 	op_2 := &ebiten.DrawImageOptions{}
 	ball_op := &ebiten.DrawImageOptions{}

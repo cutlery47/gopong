@@ -25,15 +25,20 @@ func NewLocalGame(configPath string) *Game {
 	}
 
 	inputChan := make(chan core.CombinedKeyboardInputResult)
-	updateChan := make(chan core.StateUpdate)
 
-	client := local.InitLocalClient(updateChan, inputChan, config.LocalConfig)
-	session := core.InitSession(updateChan, inputChan, config.LocalConfig, config.GameConfig.MaxTPS)
+	state := core.StateFromConfig(config.StateConfig)
+	client := local.InitClient(inputChan, &state)
+	session := core.InitSession(inputChan, &state)
 
 	return &Game{
-		client:  client,
+		client:  &client,
 		session: session,
 	}
+}
+
+func (g Game) Run() {
+	go g.client.Run()
+	ebiten.RunGame(g.session)
 }
 
 // func NewMultiplayerGame(configPath string) *Game {
@@ -50,11 +55,6 @@ func NewLocalGame(configPath string) *Game {
 // 		session: core.InitSession(updateChan, inputChan, config.SessionConfig),
 // 	}
 // }
-
-func (g Game) Run() {
-	go g.client.Run()
-	ebiten.RunGame(g.session)
-}
 
 // func RunLocalGame(configPath string) {
 // 	// reading config

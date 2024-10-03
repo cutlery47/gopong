@@ -7,89 +7,51 @@ import (
 )
 
 type Canvas struct {
-	width  int
-	height int
-	screen *ebiten.Image
-
-	left  canvasPlatform
-	right canvasPlatform
-	ball  canvasBall
+	state      *State
+	leftImage  *ebiten.Image
+	rightImage *ebiten.Image
+	ballImage  *ebiten.Image
 }
 
-func NewCanvas(width, height, platWidth, platHeight, ballSize int, left, right *platform, ball *ball) *Canvas {
-	screen := ebiten.NewImage(width, height)
-	leftCanvasPlatform := initCanvasPlatform(platWidth, platHeight, left)
-	rightCanvasPlatform := initCanvasPlatform(platWidth, platHeight, right)
-	canvasBall := initCanvasBall(ballSize, ball)
+func NewCanvas(state *State) *Canvas {
+	ebiten.SetWindowSize(int(state.screen.width), int(state.screen.height))
+
+	leftImage := ebiten.NewImage(int(state.left.width), int(state.left.height))
+	rightImage := ebiten.NewImage(int(state.right.width), int(state.right.height))
+	ballImage := ebiten.NewImage(int(state.ball.size), int(state.ball.size))
+
+	leftImage.Fill(color.White)
+	rightImage.Fill(color.White)
+	ballImage.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
 	return &Canvas{
-		width:  width,
-		height: height,
-		screen: screen,
-		ball:   canvasBall,
-		left:   leftCanvasPlatform,
-		right:  rightCanvasPlatform,
+		state:      state,
+		leftImage:  leftImage,
+		rightImage: rightImage,
+		ballImage:  ballImage,
 	}
 }
 
 func (c Canvas) LeftPos() (x, y float64) {
-	return c.left.plat.pos.x, c.left.plat.pos.y
+	return c.state.left.pos.x, c.state.left.pos.y
 }
 
 func (c Canvas) RightPos() (x, y float64) {
-	return c.right.plat.pos.x, c.right.plat.pos.y
+	return c.state.right.pos.x, c.state.right.pos.y
 }
 
 func (c Canvas) BallPos() (x, y float64) {
-	return c.ball.ball.pos.x, c.ball.ball.pos.y
+	return c.state.ball.pos.x, c.state.ball.pos.y
 }
 
 func (c Canvas) LeftImage() *ebiten.Image {
-	return c.left.image
+	return c.leftImage
 }
 
 func (c Canvas) RightImage() *ebiten.Image {
-	return c.right.image
+	return c.rightImage
 }
 
 func (c Canvas) BallImage() *ebiten.Image {
-	return c.ball.image
-}
-
-type canvasPlatform struct {
-	width  int
-	height int
-
-	image *ebiten.Image
-	plat  *platform
-}
-
-func initCanvasPlatform(width, height int, plat *platform) canvasPlatform {
-	image := ebiten.NewImage(width, height)
-	image.Fill(color.White)
-
-	return canvasPlatform{
-		width:  width,
-		height: height,
-		image:  image,
-		plat:   plat,
-	}
-}
-
-type canvasBall struct {
-	size int
-
-	image *ebiten.Image
-	ball  *ball
-}
-
-func initCanvasBall(size int, ball *ball) canvasBall {
-	image := ebiten.NewImage(size, size)
-	image.Fill(color.RGBA{0xff, 0, 0, 0xff})
-
-	return canvasBall{
-		size:  size,
-		image: image,
-		ball:  ball,
-	}
+	return c.ballImage
 }

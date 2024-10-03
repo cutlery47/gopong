@@ -8,16 +8,19 @@ import (
 
 type Config struct {
 	GameConfig  GameConfig
-	LocalConfig LocalConfig
+	StateConfig StateConfig
 	// MultipayerClientConfig MultiplayerClientConfig
 }
 
-type LocalConfig struct {
-	BallSize     int
-	PlatWidth    int
-	PlatHeight   int
-	ScreenWidth  int
-	ScreenHeight int
+type StateConfig struct {
+	BallSize     float64
+	BallInitVelX float64
+	BallInitVelY float64
+	PlatWidth    float64
+	PlatHeight   float64
+	PlatVelocity float64
+	ScreenWidth  float64
+	ScreenHeight float64
 }
 
 type GameConfig struct {

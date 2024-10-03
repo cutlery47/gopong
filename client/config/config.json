@@ -1,10 +1,13 @@
 {
-    "LocalConfig": {
-        "BallSize":     20, 
-        "PlatWidth":    40,
-        "PlatHeight":   100,
-        "ScreenWidth":  1000,
-        "ScreenHeight": 500
+    "StateConfig": {
+        "BallSize":     20.0, 
+        "BallInitVelX": 2.0,
+        "BallInitVelY": 2.0,
+        "PlatWidth":    10.0,
+        "PlatHeight":   100.0,
+        "PlatVelocity": 5.0,
+        "ScreenWidth":  1000.0,
+        "ScreenHeight": 500.0
     }, 
     "GameConfig": {
         "MaxTPS": 128
