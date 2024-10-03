@@ -1,7 +1,10 @@
 {
-    "WebServerConfig": {
-        "Host": "localhost",
-        "Port": 8080
+    "LocalConfig": {
+        "BallSize":     20, 
+        "PlatWidth":    40,
+        "PlatHeight":   100,
+        "ScreenWidth":  1000,
+        "ScreenHeight": 500
     }, 
     "GameConfig": {
         "MaxTPS": 128

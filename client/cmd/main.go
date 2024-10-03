@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/cutlery47/gopong/client/internal/game"
+	game "github.com/cutlery47/gopong/client/internal"
 )
 
 func main() {
-	game.RunMultiplayerGame("config/config.json")
+	game := game.NewLocalGame("config/config.json")
+	game.Run()
 }

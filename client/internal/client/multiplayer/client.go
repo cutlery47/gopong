@@ -13,7 +13,6 @@ import (
 type multiplayerClient struct {
 	updater *Updater
 	drawer  common.Drawer
-	reader  common.KeyboardInputReader
 
 	side   string
 	conn   conn.Connection
@@ -35,7 +34,7 @@ func NewMultiplayerClient(conn conn.Connection, servConfig protocol.GameConfig, 
 
 	ebiten.SetTPS(cliConfig.MaxTPS)
 
-	updater := NewUpdater(statePipe, &reader)
+	updater := NewUpdater(statePipe, &reader, string(servConfig.Side))
 	drawer := common.NewRenderer()
 	side := string(servConfig.Side)
 
@@ -44,7 +43,6 @@ func NewMultiplayerClient(conn conn.Connection, servConfig protocol.GameConfig, 
 
 	client := &multiplayerClient{
 		updater:   updater,
-		reader:    reader,
 		drawer:    drawer,
 		conn:      conn,
 		canvas:    canvas,
@@ -59,7 +57,7 @@ func NewMultiplayerClient(conn conn.Connection, servConfig protocol.GameConfig, 
 
 func (mc *multiplayerClient) Update() error {
 	mc.updater.Update(mc.canvas)
-	pack := mc.updater.PackState(mc.side, mc.canvas)
+	pack := mc.updater.PackState(mc.canvas)
 	mc.conn.Send(pack)
 	return nil
 }

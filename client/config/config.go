@@ -7,13 +7,17 @@ import (
 )
 
 type Config struct {
-	WebServerConfig WebServerConfig
-	GameConfig      GameConfig
+	GameConfig  GameConfig
+	LocalConfig LocalConfig
+	// MultipayerClientConfig MultiplayerClientConfig
 }
 
-type WebServerConfig struct {
-	Host string
-	Port int
+type LocalConfig struct {
+	BallSize     int
+	PlatWidth    int
+	PlatHeight   int
+	ScreenWidth  int
+	ScreenHeight int
 }
 
 type GameConfig struct {

@@ -1,4 +1,4 @@
-package common
+package core
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,4 +36,9 @@ func (kir KeyboardInputReader) Read() KeyboardInputResult {
 type KeyboardInputResult struct {
 	Up   bool
 	Down bool
+}
+
+type CombinedKeyboardInputResult struct {
+	Left  KeyboardInputResult
+	Right KeyboardInputResult
 }

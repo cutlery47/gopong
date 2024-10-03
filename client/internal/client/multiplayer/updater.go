@@ -12,7 +12,7 @@ type Updater struct {
 	statePipe <-chan protocol.ServerPacket
 }
 
-func NewUpdater(statePipe <-chan protocol.ServerPacket, reader *common.KeyboardInputReader) *Updater {
+func NewUpdater(statePipe <-chan protocol.ServerPacket, reader *common.KeyboardInputReader, side string) *Updater {
 	return &Updater{
 		statePipe: statePipe,
 		reader:    reader,
@@ -25,7 +25,7 @@ func (u *Updater) Update(canvas *gui.Canvas) error {
 	return nil
 }
 
-func (u *Updater) PackState(side string, canvas *gui.Canvas) protocol.ClientPacket {
+func (u *Updater) PackState(canvas *gui.Canvas) protocol.ClientPacket {
 	pack := protocol.ClientPacket{}
 
 	input := u.reader.Read()
