@@ -11,6 +11,7 @@ type State struct {
 	left   platform
 	right  platform
 	screen screen
+	score  score
 }
 
 func NewState() *State {
@@ -24,21 +25,27 @@ func NewState() *State {
 
 func StateFromConfig(conf config.StateConfig) State {
 	return State{
-		ball:   initBall(conf.BallSize, conf.BallInitVelX, conf.BallInitVelY),
+		ball:   initBall(conf.BallSize, conf.BallInitVelX, conf.BallInitVelY, conf.BallAccelMult),
 		left:   platform{width: conf.PlatWidth, height: conf.PlatHeight, vel: conf.PlatVelocity},
 		right:  platform{width: conf.PlatWidth, height: conf.PlatHeight, vel: conf.PlatVelocity},
 		screen: screen{width: conf.ScreenWidth, height: conf.ScreenHeight},
+		score:  score{left: 0, right: 0, max: conf.PointsToWin},
 	}
 }
 
-func (s *State) Place() {
+type score struct {
+	left  int
+	right int
+	max   int
+}
+
+func (s *State) Flush() {
 	s.left.pos.x = 0
 	s.left.pos.y = s.screen.height/2 - s.left.height/2
 	s.right.pos.x = s.screen.width - s.right.width
 	s.right.pos.y = s.screen.height/2 - s.left.height/2
 	s.ball.pos.x = s.screen.width/2 - s.ball.size/2
 	s.ball.pos.y = s.screen.height/2 - s.ball.size/2
-
 }
 
 func (s *State) LeftMoveUp() {
@@ -78,18 +85,48 @@ func (s *State) BallMove() {
 }
 
 func (s *State) HandleCollision() {
-	if s.ball.pos.y == 0 || s.ball.pos.y == s.screen.height-s.ball.size {
+	// ball hits lower or upper borders
+	if s.ball.pos.y <= 0 || s.ball.pos.y >= s.screen.height-s.ball.size {
 		s.ball.movec.y *= -1
-	}
-
-	if 0 <= s.ball.pos.x && s.ball.pos.x <= s.left.width {
+	} else if (s.ball.pos.x <= s.left.width) && (s.left.pos.y-s.ball.size <= s.ball.pos.y && s.ball.pos.y <= s.left.pos.y+s.left.height) {
+		// ball hits left platform
 		s.ball.movec.x *= -1
-	}
-
-	if s.right.pos.x-s.ball.size <= s.ball.pos.x && s.ball.pos.x <= s.screen.width-s.ball.size {
+	} else if (s.ball.pos.x >= s.screen.width-s.ball.size-s.right.width) && (s.right.pos.y-s.ball.size <= s.ball.pos.y && s.ball.pos.y <= s.right.pos.y+s.right.height) {
+		// ball hits right platform
 		s.ball.movec.x *= -1
+	} else {
+		return
 	}
 
+	s.ball.accelerate()
+}
+
+func (s *State) HandleOutOfBounds() bool {
+	// right scored
+	if s.ball.pos.x+s.ball.size < 0 {
+		s.score.right++
+		return true
+	}
+
+	if s.ball.pos.x >= s.right.pos.x+s.right.width {
+		// log.Println("XYU")
+		s.score.left++
+		return true
+	}
+
+	return false
+}
+
+func (s State) PlayerWon() bool {
+	if s.score.left > s.score.max || s.score.right > s.score.max {
+		return true
+	}
+
+	return false
+}
+
+func (s State) MaxScore() int {
+	return s.score.max
 }
 
 type ball struct {
@@ -97,9 +134,11 @@ type ball struct {
 	pos  vector
 	// movement vector
 	movec vector
+	// acceleration multiplier
+	accel float64
 }
 
-func initBall(size float64, velX float64, velY float64) ball {
+func initBall(size, velX, velY, accel float64) ball {
 	rng := rand.IntN(2)
 
 	movec := vector{}
@@ -119,12 +158,18 @@ func initBall(size float64, velX float64, velY float64) ball {
 	return ball{
 		size:  size,
 		movec: movec,
+		accel: accel,
 	}
 }
 
 // cur position + movement vector
 func (b *ball) move() {
 	b.pos.add(b.movec)
+}
+
+// accelerate ball by mult
+func (b *ball) accelerate() {
+	b.movec.mult(b.accel)
 }
 
 type platform struct {

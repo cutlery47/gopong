@@ -1,15 +1,21 @@
 {
     "StateConfig": {
         "BallSize":     20.0, 
-        "BallInitVelX": 2.0,
-        "BallInitVelY": 2.0,
+        "BallInitVelX": 4.0,
+        "BallInitVelY": 4.0,
+        "BallAccelMult": 1.05,
         "PlatWidth":    10.0,
         "PlatHeight":   100.0,
         "PlatVelocity": 5.0,
         "ScreenWidth":  1000.0,
-        "ScreenHeight": 500.0
+        "ScreenHeight": 500.0,
+        "PointsToWin": 5
     }, 
     "GameConfig": {
         "MaxTPS": 128
+    },
+    "CanvasConfig": {
+        "ScoreX": 10,
+        "ScoreY": 10
     }
 }

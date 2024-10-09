@@ -25,10 +25,11 @@ func NewLocalGame(configPath string) *Game {
 	}
 
 	inputChan := make(chan core.CombinedKeyboardInputResult)
+	clientExitChan := make(chan byte)
 
 	state := core.StateFromConfig(config.StateConfig)
-	client := local.InitClient(inputChan, &state)
-	session := core.InitSession(inputChan, &state)
+	client := local.InitClient(inputChan, clientExitChan, &state)
+	session := core.InitSession(inputChan, clientExitChan, &state)
 
 	return &Game{
 		client:  &client,

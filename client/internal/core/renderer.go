@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+
+	ebitext "github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
 type Renderer struct {
@@ -16,17 +18,24 @@ func NewRenderer(canvas *Canvas) *Renderer {
 
 func (r *Renderer) Draw(screen *ebiten.Image) {
 	// log.Printf("%+v\n", r.canvas.state)
-	op_1 := &ebiten.DrawImageOptions{}
-	op_2 := &ebiten.DrawImageOptions{}
-	ball_op := &ebiten.DrawImageOptions{}
+	op1 := &ebiten.DrawImageOptions{}
+	op2 := &ebiten.DrawImageOptions{}
+	ballOp := &ebiten.DrawImageOptions{}
+	msgOp := &ebitext.DrawOptions{}
 
 	// locating objects on the canvas
-	op_1.GeoM.Translate(r.canvas.LeftPos())
-	op_2.GeoM.Translate(r.canvas.RightPos())
-	ball_op.GeoM.Translate(r.canvas.BallPos())
+	op1.GeoM.Translate(r.canvas.LeftPos())
+	op2.GeoM.Translate(r.canvas.RightPos())
+	ballOp.GeoM.Translate(r.canvas.BallPos())
+	msgOp.GeoM.Translate(r.canvas.TextPos())
+
+	// scoreMsg := fmt.Sprintf("%v : %v", r.canvas.state.score.left, r.canvas.state.score.right)
+
+	r.canvas.UpdateScoreText()
 
 	// rendering
-	screen.DrawImage(r.canvas.LeftImage(), op_1)
-	screen.DrawImage(r.canvas.RightImage(), op_2)
-	screen.DrawImage(r.canvas.BallImage(), ball_op)
+	screen.DrawImage(r.canvas.LeftImage(), op1)
+	screen.DrawImage(r.canvas.RightImage(), op2)
+	screen.DrawImage(r.canvas.BallImage(), ballOp)
+	ebitext.Draw(screen, r.canvas.scoreText.text, r.canvas.scoreText.face, msgOp)
 }
