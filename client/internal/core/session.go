@@ -12,10 +12,10 @@ type Session struct {
 	// channel for sending game updates
 	inputChan chan<- CombinedKeyboardInputResult
 	// channel for closing a game
-	clientExitChan <-chan byte
+	exitChan <-chan byte
 }
 
-func InitSession(inputChan chan<- CombinedKeyboardInputResult, clientExitChan <-chan byte, state *State) Session {
+func InitSession(inputChan chan<- CombinedKeyboardInputResult, exitChan <-chan byte, state *State) Session {
 	canvas := NewCanvas(state)
 	renderer := NewRenderer(canvas)
 
@@ -25,11 +25,11 @@ func InitSession(inputChan chan<- CombinedKeyboardInputResult, clientExitChan <-
 	rightReader := RightKeyboardInputReader
 
 	return Session{
-		renderer:       renderer,
-		leftReader:     leftReader,
-		rightReader:    rightReader,
-		inputChan:      inputChan,
-		clientExitChan: clientExitChan,
+		renderer:    renderer,
+		leftReader:  leftReader,
+		rightReader: rightReader,
+		inputChan:   inputChan,
+		exitChan:    exitChan,
 	}
 }
 
@@ -37,7 +37,6 @@ func (s Session) Update() error {
 	if exit := s.listenForExit(); exit != nil {
 		return exit
 	}
-
 	// receiving keyboard input
 	leftInput := s.leftReader.Read()
 	rightInput := s.rightReader.Read()
@@ -57,7 +56,7 @@ func (s Session) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHei
 
 func (s Session) listenForExit() error {
 	select {
-	case <-s.clientExitChan:
+	case <-s.exitChan:
 		return ebiten.Termination
 	default:
 		return nil

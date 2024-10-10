@@ -12,6 +12,7 @@ type State struct {
 	right  platform
 	screen screen
 	score  score
+	config config.StateConfig
 }
 
 func NewState() *State {
@@ -30,6 +31,7 @@ func StateFromConfig(conf config.StateConfig) State {
 		right:  platform{width: conf.PlatWidth, height: conf.PlatHeight, vel: conf.PlatVelocity},
 		screen: screen{width: conf.ScreenWidth, height: conf.ScreenHeight},
 		score:  score{left: 0, right: 0, max: conf.PointsToWin},
+		config: conf,
 	}
 }
 
@@ -40,12 +42,9 @@ type score struct {
 }
 
 func (s *State) Flush() {
-	s.left.pos.x = 0
-	s.left.pos.y = s.screen.height/2 - s.left.height/2
-	s.right.pos.x = s.screen.width - s.right.width
-	s.right.pos.y = s.screen.height/2 - s.left.height/2
-	s.ball.pos.x = s.screen.width/2 - s.ball.size/2
-	s.ball.pos.y = s.screen.height/2 - s.ball.size/2
+	s.left.flush(0, s.screen.height/2-s.left.height/2)
+	s.right.flush(s.screen.width-s.right.width, s.screen.height/2-s.left.height/2)
+	s.ball.flush(s.screen.width/2-s.ball.size/2, s.screen.height/2-s.ball.size/2, s.config.BallInitVelX, s.config.BallInitVelY)
 }
 
 func (s *State) LeftMoveUp() {
@@ -118,7 +117,7 @@ func (s *State) HandleOutOfBounds() bool {
 }
 
 func (s State) PlayerWon() bool {
-	if s.score.left > s.score.max || s.score.right > s.score.max {
+	if s.score.left >= s.score.max || s.score.right >= s.score.max {
 		return true
 	}
 
@@ -139,27 +138,34 @@ type ball struct {
 }
 
 func initBall(size, velX, velY, accel float64) ball {
-	rng := rand.IntN(2)
-
-	movec := vector{}
-	if rng == 1 {
-		movec.x = velX
-	} else {
-		movec.x = -velX
-	}
-
-	rng = rand.IntN(2)
-	if rng == 1 {
-		movec.y = velY
-	} else {
-		movec.y = -velY
-	}
-
-	return ball{
+	ball := ball{
 		size:  size,
-		movec: movec,
+		movec: vector{x: velX, y: velY},
 		accel: accel,
 	}
+
+	return ball
+}
+
+// positioning and randomizing ball direction
+func (b *ball) flush(posX, posY, velX, velY float64) {
+	rngX := rand.IntN(2)
+	rngY := rand.IntN(2)
+
+	if rngX == 1 {
+		b.movec.x = -velX
+	} else {
+		b.movec.x = velX
+	}
+
+	if rngY == 1 {
+		b.movec.y = -velY
+	} else {
+		b.movec.y = velY
+	}
+
+	b.pos.x = posX
+	b.pos.y = posY
 }
 
 // cur position + movement vector
@@ -186,6 +192,11 @@ func (p *platform) MoveUp() {
 
 func (p *platform) MoveDown() {
 	p.pos.y += p.vel
+}
+
+// positioning platform
+func (p *platform) flush(posX, posY float64) {
+	p.pos.x, p.pos.y = posX, posY
 }
 
 type vector struct {

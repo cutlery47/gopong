@@ -2,11 +2,11 @@
     "StateConfig": {
         "BallSize":     20.0, 
         "BallInitVelX": 4.0,
-        "BallInitVelY": 4.0,
-        "BallAccelMult": 1.05,
+        "BallInitVelY": 3.3,
+        "BallAccelMult": 1.03,
         "PlatWidth":    10.0,
         "PlatHeight":   100.0,
-        "PlatVelocity": 5.0,
+        "PlatVelocity": 10.0,
         "ScreenWidth":  1000.0,
         "ScreenHeight": 500.0,
         "PointsToWin": 5

@@ -1,5 +1,54 @@
 package multiplayer
 
+import (
+	"github.com/cutlery47/gopong/client/config"
+	"github.com/cutlery47/gopong/client/internal/core"
+)
+
+type Multiplayer struct {
+	// channel for reading session input
+	sessionInputChan <-chan core.CombinedKeyboardInputResult
+	// channel for sending output to client
+	clientOutputChan chan<- core.CombinedKeyboardInputResult
+	// channel for terminating main loop
+	exitChan <-chan byte
+	// channel for signaling that multiplayer client is about to close
+	finishChan chan<- byte
+}
+
+func Init(
+	config config.Config,
+	sessionInputChan <-chan core.CombinedKeyboardInputResult,
+	clientOutputChan chan<- core.CombinedKeyboardInputResult,
+	exitChan <-chan byte,
+	finishChan <-chan byte,
+) Multiplayer {
+	return Multiplayer{}
+}
+
+func (m Multiplayer) FindGame() *core.State {
+	return &core.State{}
+}
+
+func (m Multiplayer) Run() {
+	for {
+		input := <-m.sessionInputChan
+
+		output := input
+
+		m.clientOutputChan <- output
+	}
+}
+
+func (m Multiplayer) listenForExit() bool {
+	select {
+	case <-m.exitChan:
+		return true
+	default:
+		return false
+	}
+}
+
 // import (
 // 	"github.com/cutlery47/gopong/client/config"
 // 	"github.com/cutlery47/gopong/client/internal/game/common"
