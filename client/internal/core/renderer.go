@@ -16,7 +16,7 @@ func NewRenderer(canvas *Canvas) *Renderer {
 	}
 }
 
-func (r *Renderer) Draw(screen *ebiten.Image) {
+func (r *Renderer) DrawGame(screen *ebiten.Image) {
 	// log.Printf("%+v\n", r.canvas.state)
 	op1 := &ebiten.DrawImageOptions{}
 	op2 := &ebiten.DrawImageOptions{}
@@ -38,4 +38,8 @@ func (r *Renderer) Draw(screen *ebiten.Image) {
 	screen.DrawImage(r.canvas.RightImage(), op2)
 	screen.DrawImage(r.canvas.BallImage(), ballOp)
 	ebitext.Draw(screen, r.canvas.scoreText.text, r.canvas.scoreText.face, msgOp)
+}
+
+func (r *Renderer) DrawIdle(screen *ebiten.Image) {
+
 }

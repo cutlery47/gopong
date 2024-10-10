@@ -4,23 +4,33 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type KeyboardInputReader struct {
+type KeyboardGameInputReader struct {
 	UpKey   ebiten.Key
 	DownKey ebiten.Key
 }
 
-var LeftKeyboardInputReader = KeyboardInputReader{
+type KeyboardIdleInputReader struct {
+	RestartKey ebiten.Key
+	ExitKey    ebiten.Key
+}
+
+var LeftKeyboardInputReader = KeyboardGameInputReader{
 	UpKey:   ebiten.KeyW,
 	DownKey: ebiten.KeyS,
 }
 
-var RightKeyboardInputReader = KeyboardInputReader{
+var RightKeyboardInputReader = KeyboardGameInputReader{
 	UpKey:   ebiten.KeyArrowUp,
 	DownKey: ebiten.KeyArrowDown,
 }
 
-func (kir KeyboardInputReader) Read() KeyboardInputResult {
-	res := KeyboardInputResult{}
+var IdleKeyboardInputReader = KeyboardIdleInputReader{
+	RestartKey: ebiten.KeyR,
+	ExitKey:    ebiten.KeyEscape,
+}
+
+func (kir KeyboardGameInputReader) Read() KeyboardGameInputResult {
+	res := KeyboardGameInputResult{}
 
 	if ebiten.IsKeyPressed(kir.UpKey) {
 		res.Up = true
@@ -33,12 +43,31 @@ func (kir KeyboardInputReader) Read() KeyboardInputResult {
 	return res
 }
 
-type KeyboardInputResult struct {
+func (kir KeyboardIdleInputReader) Read() KeyboardIdleInputResult {
+	res := KeyboardIdleInputResult{}
+
+	if ebiten.IsKeyPressed(kir.ExitKey) {
+		res.Exit = true
+	}
+
+	if ebiten.IsKeyPressed(kir.RestartKey) {
+		res.Restart = true
+	}
+
+	return res
+}
+
+type KeyboardGameInputResult struct {
 	Up   bool
 	Down bool
 }
 
-type CombinedKeyboardInputResult struct {
-	Left  KeyboardInputResult
-	Right KeyboardInputResult
+type KeyboardIdleInputResult struct {
+	Restart bool
+	Exit    bool
+}
+
+type CombinedKeyboardGameInputResult struct {
+	Left  KeyboardGameInputResult
+	Right KeyboardGameInputResult
 }

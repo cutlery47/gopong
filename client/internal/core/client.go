@@ -1,28 +1,46 @@
 package core
 
+import "log"
+
 type Client struct {
 	state *State
 
 	// channel for reading user inputs
-	inputChan <-chan CombinedKeyboardInputResult
+	inputChan <-chan CombinedKeyboardGameInputResult
 	// channel for terminating main loop
 	exitChan <-chan byte
+	// channel for starting the main loop
+	startChan <-chan byte
 	// channel for signaling that the game has finished
 	finishChan chan<- byte
 }
 
-func InitClient(inputChan <-chan CombinedKeyboardInputResult, exitChan <-chan byte, finishChan chan<- byte, state *State) Client {
-	state.Flush()
-
+func InitClient(inputChan <-chan CombinedKeyboardGameInputResult, exitChan, startChan <-chan byte, finishChan chan<- byte, state *State) Client {
 	return Client{
 		state:      state,
 		inputChan:  inputChan,
 		exitChan:   exitChan,
+		startChan:  startChan,
 		finishChan: finishChan,
 	}
 }
 
 func (c *Client) Run() {
+	for {
+		select {
+		// start client loop
+		case <-c.startChan:
+			log.Println("shuild start")
+			c.state.Flush()
+			c.run()
+		// exit
+		case <-c.exitChan:
+			return
+		}
+	}
+}
+
+func (c *Client) run() {
 	for {
 		if exit := c.listenForExit(); exit {
 			return

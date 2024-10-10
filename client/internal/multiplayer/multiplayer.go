@@ -7,9 +7,9 @@ import (
 
 type Multiplayer struct {
 	// channel for reading session input
-	sessionInputChan <-chan core.CombinedKeyboardInputResult
+	sessionInputChan <-chan core.CombinedKeyboardGameInputResult
 	// channel for sending output to client
-	clientOutputChan chan<- core.CombinedKeyboardInputResult
+	clientOutputChan chan<- core.CombinedKeyboardGameInputResult
 	// channel for terminating main loop
 	exitChan <-chan byte
 	// channel for signaling that multiplayer client is about to close
@@ -18,8 +18,8 @@ type Multiplayer struct {
 
 func Init(
 	config config.Config,
-	sessionInputChan <-chan core.CombinedKeyboardInputResult,
-	clientOutputChan chan<- core.CombinedKeyboardInputResult,
+	sessionInputChan <-chan core.CombinedKeyboardGameInputResult,
+	clientOutputChan chan<- core.CombinedKeyboardGameInputResult,
 	exitChan <-chan byte,
 	finishChan <-chan byte,
 ) Multiplayer {
