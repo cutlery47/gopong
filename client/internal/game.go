@@ -63,7 +63,7 @@ func NewLocalGame(configPath string) *LocalGame {
 	sessionFinishChan := make(chan byte)
 	sessionStartChan := make(chan byte)
 	sessionIdleChan := make(chan byte)
-	session := core.InitSession(keyboardInputChan, sessionExitChan, sessionFinishChan, sessionStartChan, sessionIdleChan, &state)
+	session := core.InitSession(keyboardInputChan, sessionExitChan, sessionIdleChan, sessionFinishChan, sessionStartChan, &state)
 
 	chanManager := ChannelManager{
 		clientExitChan:    clientExitChan,
@@ -85,10 +85,10 @@ func NewLocalGame(configPath string) *LocalGame {
 	return &game
 }
 
-func (g LocalGame) Run() {
+func (g *LocalGame) Run() {
 	go g.client.Run()
 	go g.session.ListenForIdle()
-	ebiten.RunGame(g.session)
+	ebiten.RunGame(&g.session)
 }
 
 // type MultiplayerGame struct {

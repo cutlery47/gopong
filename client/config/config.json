@@ -9,7 +9,7 @@
         "PlatVelocity": 10.0,
         "ScreenWidth":  1000.0,
         "ScreenHeight": 500.0,
-        "PointsToWin": 5
+        "PointsToWin": 1
     }, 
     "GameConfig": {
         "MaxTPS": 128

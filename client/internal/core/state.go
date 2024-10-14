@@ -35,16 +35,15 @@ func StateFromConfig(conf config.StateConfig) State {
 	}
 }
 
-type score struct {
-	left  int
-	right int
-	max   int
-}
-
 func (s *State) Flush() {
 	s.left.flush(0, s.screen.height/2-s.left.height/2)
 	s.right.flush(s.screen.width-s.right.width, s.screen.height/2-s.left.height/2)
 	s.ball.flush(s.screen.width/2-s.ball.size/2, s.screen.height/2-s.ball.size/2, s.config.BallInitVelX, s.config.BallInitVelY)
+}
+
+func (s *State) FullFlush() {
+	s.Flush()
+	s.score.flush()
 }
 
 func (s *State) LeftMoveUp() {
@@ -126,6 +125,17 @@ func (s State) PlayerWon() bool {
 
 func (s State) MaxScore() int {
 	return s.score.max
+}
+
+type score struct {
+	left  int
+	right int
+	max   int
+}
+
+func (s *score) flush() {
+	s.left = 0
+	s.right = 0
 }
 
 type ball struct {

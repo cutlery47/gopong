@@ -1,7 +1,5 @@
 package core
 
-import "log"
-
 type Client struct {
 	state *State
 
@@ -30,8 +28,6 @@ func (c *Client) Run() {
 		select {
 		// start client loop
 		case <-c.startChan:
-			log.Println("shuild start")
-			c.state.Flush()
 			c.run()
 		// exit
 		case <-c.exitChan:
@@ -41,6 +37,7 @@ func (c *Client) Run() {
 }
 
 func (c *Client) run() {
+	c.state.FullFlush()
 	for {
 		if exit := c.listenForExit(); exit {
 			return
@@ -68,10 +65,12 @@ func (c *Client) run() {
 		scored := c.state.HandleOutOfBounds()
 
 		if scored {
+			c.state.Flush()
+
 			if c.state.PlayerWon() {
 				c.finishChan <- 1
+				return
 			}
-			c.state.Flush()
 		}
 
 		c.state.HandleCollision()

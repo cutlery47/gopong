@@ -1,8 +1,6 @@
 package core
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -29,9 +27,10 @@ type Session struct {
 	idleChan <-chan byte
 }
 
-func InitSession(inputChan chan<- CombinedKeyboardGameInputResult, exitChan <-chan byte, finishChan, startChan, idleChan chan<- byte, state *State) Session {
+func InitSession(inputChan chan<- CombinedKeyboardGameInputResult, exitChan, idleChan <-chan byte, finishChan, startChan chan<- byte, state *State) Session {
 	canvas := NewCanvas(state)
-	renderer := NewRenderer(canvas)
+	idleCanvas := NewIdleCanvas()
+	renderer := NewRenderer(canvas, idleCanvas)
 
 	// left player reader
 	leftReader := LeftKeyboardInputReader
@@ -49,12 +48,13 @@ func InitSession(inputChan chan<- CombinedKeyboardGameInputResult, exitChan <-ch
 		exitChan:    exitChan,
 		finishChan:  finishChan,
 		startChan:   startChan,
+		idleChan:    idleChan,
 		mode:        SessionIdleMode,
 	}
 }
 
 // reading and handling user input
-func (s Session) Update() error {
+func (s *Session) Update() error {
 	if exit := s.listenForExit(); exit != nil {
 		return exit
 	}
@@ -70,7 +70,7 @@ func (s Session) Update() error {
 }
 
 // rendering
-func (s Session) Draw(screen *ebiten.Image) {
+func (s *Session) Draw(screen *ebiten.Image) {
 	switch s.mode {
 	case SessionIdleMode:
 		s.renderer.DrawIdle(screen)
@@ -80,8 +80,7 @@ func (s Session) Draw(screen *ebiten.Image) {
 }
 
 // reading and handling user input while game is active
-func (s Session) UpdateGame() error {
-	log.Println("xwsdf")
+func (s *Session) UpdateGame() error {
 	leftInput := s.leftReader.Read()
 	rightInput := s.rightReader.Read()
 	// sending the input

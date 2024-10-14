@@ -7,12 +7,14 @@ import (
 )
 
 type Renderer struct {
-	canvas *Canvas
+	canvas     *Canvas
+	idleCanvas *IdleCanvas
 }
 
-func NewRenderer(canvas *Canvas) *Renderer {
+func NewRenderer(canvas *Canvas, idleCanvas *IdleCanvas) *Renderer {
 	return &Renderer{
-		canvas: canvas,
+		canvas:     canvas,
+		idleCanvas: idleCanvas,
 	}
 }
 
@@ -41,5 +43,15 @@ func (r *Renderer) DrawGame(screen *ebiten.Image) {
 }
 
 func (r *Renderer) DrawIdle(screen *ebiten.Image) {
+	resOp := &ebitext.DrawOptions{}
+	instOp1 := &ebitext.DrawOptions{}
+	instOp2 := &ebitext.DrawOptions{}
 
+	resOp.GeoM.Translate(r.idleCanvas.ResPos())
+	instOp1.GeoM.Translate(r.idleCanvas.InstPos1())
+	instOp2.GeoM.Translate(r.idleCanvas.InstPos2())
+
+	ebitext.Draw(screen, r.idleCanvas.resultText.text, r.idleCanvas.resultText.face, resOp)
+	ebitext.Draw(screen, r.idleCanvas.instructText1.text, r.idleCanvas.instructText1.face, instOp1)
+	ebitext.Draw(screen, r.idleCanvas.instructText2.text, r.idleCanvas.instructText2.face, instOp2)
 }

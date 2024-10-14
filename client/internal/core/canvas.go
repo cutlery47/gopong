@@ -15,7 +15,7 @@ type Canvas struct {
 	leftImage  *ebiten.Image
 	rightImage *ebiten.Image
 	ballImage  *ebiten.Image
-	scoreText  CanvasScoreText
+	scoreText  CanvasText
 }
 
 func NewCanvas(state *State) *Canvas {
@@ -24,7 +24,7 @@ func NewCanvas(state *State) *Canvas {
 	leftImage := ebiten.NewImage(int(state.left.width), int(state.left.height))
 	rightImage := ebiten.NewImage(int(state.right.width), int(state.right.height))
 	ballImage := ebiten.NewImage(int(state.ball.size), int(state.ball.size))
-	scoreText := InitCanvasScoreText(10, 10, 24, "")
+	scoreText := InitCanvasText(10, 10, 24, "")
 
 	leftImage.Fill(color.White)
 	rightImage.Fill(color.White)
@@ -79,7 +79,37 @@ func (c *Canvas) UpdateScoreText() {
 	c.scoreText.text = fmt.Sprintf("%v : %v", c.state.score.left, c.state.score.right)
 }
 
-type CanvasScoreText struct {
+type IdleCanvas struct {
+	resultText    CanvasText
+	instructText1 CanvasText
+	instructText2 CanvasText
+}
+
+func (i IdleCanvas) ResPos() (x, y float64) {
+	return i.resultText.pos.x, i.resultText.pos.y
+}
+
+func (i IdleCanvas) InstPos1() (x, y float64) {
+	return i.instructText1.pos.x, i.instructText1.pos.y
+}
+
+func (i IdleCanvas) InstPos2() (x, y float64) {
+	return i.instructText2.pos.x, i.instructText2.pos.y
+}
+
+func NewIdleCanvas() *IdleCanvas {
+	resultText := InitCanvasText(0, 0, 30, "")
+	instructText1 := InitCanvasText(0, 100, 30, "Press R to Start the Game")
+	instructText2 := InitCanvasText(0, 150, 30, "Press ESC to Quit the Game")
+
+	return &IdleCanvas{
+		resultText:    resultText,
+		instructText1: instructText1,
+		instructText2: instructText2,
+	}
+}
+
+type CanvasText struct {
 	pos  vector
 	size int
 	text string
@@ -88,15 +118,15 @@ type CanvasScoreText struct {
 }
 
 // idk what halfa dis shie does bru
-func InitCanvasScoreText(posX, posY float64, size int, text string) CanvasScoreText {
+func InitCanvasText(posX, posY float64, size int, text string) CanvasText {
 	src, _ := ebitext.NewGoTextFaceSource(bytes.NewReader(fonts.MPlus1pRegular_ttf))
 
 	face := &ebitext.GoTextFace{
 		Source: src,
-		Size:   24,
+		Size:   float64(size),
 	}
 
-	return CanvasScoreText{
+	return CanvasText{
 		pos:  vector{x: posX, y: posY},
 		size: size,
 		text: text,
